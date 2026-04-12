@@ -275,7 +275,7 @@ body::before {
 .hero {
   position: relative;
   text-align: center;
-  padding: 40px 20px 20px;
+  padding: 36px 20px 10px;
   overflow: hidden;
 }
 
@@ -1713,11 +1713,12 @@ footer {
 /* Countdown units inside locked banner */
 .locked-timer {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 28px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 .locked-unit {
   display: flex;
@@ -1725,9 +1726,11 @@ footer {
   align-items: center;
   background: rgba(212,175,55,0.07);
   border: 1px solid rgba(212,175,55,0.2);
-  border-radius: 16px;
-  padding: 18px 22px;
-  min-width: 74px;
+  border-radius: 12px;
+  padding: 10px 8px;
+  min-width: 0;
+  flex: 1;
+  max-width: 72px;
   position: relative;
   overflow: hidden;
 }
@@ -1739,25 +1742,25 @@ footer {
 }
 .locked-num {
   font-family: 'Amiri', serif;
-  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  font-size: clamp(1.6rem, 7vw, 2.8rem);
   color: var(--gold);
   line-height: 1;
   font-weight: 700;
-  filter: drop-shadow(0 0 18px rgba(212,175,55,0.35));
+  filter: drop-shadow(0 0 12px rgba(212,175,55,0.35));
 }
 .locked-unit-label {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   color: rgba(245,237,224,0.55);
-  letter-spacing: 3px;
-  margin-top: 8px;
-  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
 }
 .locked-sep {
   font-family: 'Amiri', serif;
-  font-size: 2.4rem;
+  font-size: 1.6rem;
   color: var(--burg-l);
   line-height: 1;
-  margin-bottom: 30px;
+  flex-shrink: 0;
+  margin-bottom: 18px;
   animation: wcdSepPulse 1s ease-in-out infinite;
 }
 
@@ -1912,17 +1915,12 @@ footer {
   /* Hero */
   .hero { padding: 60px 16px 40px; }
 
-  /* Locked banner countdown — تصغير على الموبايل */
-  .locked-banner { padding: 40px 12px 50px; }
-  .locked-unit {
-    padding: 12px 14px;
-    min-width: 56px;
-    border-radius: 12px;
-  }
-  .locked-num { font-size: clamp(1.8rem, 10vw, 2.8rem); }
-  .locked-sep { font-size: 1.8rem; margin-bottom: 22px; }
-  .locked-timer { gap: 6px; }
-  .locked-title { font-size: clamp(1.5rem, 6vw, 2.4rem); }
+  /* Locked banner countdown — موبايل */
+  .locked-banner { padding: 24px 10px 40px; }
+  .locked-timer { gap: 4px; }
+  .locked-unit { padding: 8px 6px; border-radius: 10px; }
+  .locked-num { font-size: clamp(1.4rem, 8vw, 2rem); }
+  .locked-sep { font-size: 1.2rem; margin-bottom: 14px; }
 
   /* Stats bar inside banner */
   .stats-bar { max-width: 100%; }
