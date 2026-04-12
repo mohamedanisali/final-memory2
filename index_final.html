@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدار ذكريات دفعة 29 — كلية التمريض</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg: #1c0a0e;
+            --burg: #7a1e3c;
+            --burg-l: #b03055;
+            --cream: #f5ede0;
+            --cream-d: rgba(245,237,224,0.7);
+            --gold: #d4af37;
+            --t: 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            font-family:'Tajawal',sans-serif;
+            background: var(--bg);
+            color: var(--cream);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; text-align: center; }
+        h1 { font-family: 'Amiri', serif; font-size: 3.5rem; color: var(--burg-l); margin-bottom: 10px; }
+        p.subtitle { color: var(--cream-d); margin-bottom: 40px; font-size: 1.1rem; }
+
+        /* --- INTRO STYLES (CINEMATIC) --- */
+        #intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0a0505 0%, #1c0a0e 50%, #2d1520 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 1s ease 3.5s, visibility 1s ease 3.5s;
+            opacity: 1;
+            visibility: visible;
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Background particles effect */
+        .intro-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .intro-content {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Main Title Animation */
+        .intro-title {
+            font-family: 'Amiri', serif;
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(176, 48, 85, 0.3);
+            opacity: 0;
+            animation: titleGlowIn 2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
+            letter-spacing: 3px;
+        }
+
+        /* Decorative Line */
+        .intro-line-top {
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 20px auto;
+            animation: expandLineTop 1.5s ease 2s forwards;
+        }
+
+        /* Subtitle */
+        .intro-subtitle {
+            font-size: 1.8rem;
+            color: var(--cream);
+            letter-spacing: 4px;
+            margin: 20px 0;
+            opacity: 0;
+            animation: subtitleFadeIn 1.5s ease 2.5s forwards;
+            font-weight: 300;
+        }
+
+        /* Decorative Line Bottom */
+        .intro-line-bottom {
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--burg-l), transparent);
+            margin: 20px auto;
+            animation: expandLineBottom 1.5s ease 3s forwards;
+        }
+
+        /* Tagline */
+        .intro-tagline {
+            font-size: 1.2rem;
+            color: var(--cream-d);
+            margin-top: 30px;
+            opacity: 0;
+            animation: taglineFadeIn 1.5s ease 3.2s forwards;
+            font-style: italic;
+        }
+
+        /* Skip Button */
+        .skip-intro-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            padding: 10px 20px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            opacity: 0;
+            animation: fadeInUp 1s ease 2s forwards;
+        }
+        .skip-intro-btn:hover {
+            background: rgba(212, 175, 55, 0.4);
+        }
+
+        @keyframes titleGlowIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) translateY(50px);
+                text-shadow: 0 0 0 rgba(212, 175, 55, 0);
+            }
+            50% {
+                text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(176, 48, 85, 0.3);
+            }
+        }
+
+        @keyframes expandLineTop {
+            to { width: 300px; }
+        }
+
+        @keyframes expandLineBottom {
+            to { width: 250px; }
+        }
+
+        @keyframes subtitleFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes taglineFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* --- END INTRO STYLES --- */
+
+        /* MEMORIES GRID */
+        .memories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+        .memory-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: var(--t);
+            position: relative;
+            animation: fadeIn 0.8s ease forwards;
+        }
+        .memory-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--burg-l);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+        .memory-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            filter: grayscale(30%);
+            transition: var(--t);
+        }
+        .memory-card:hover .memory-img { filter: grayscale(0%); }
+        .memory-name {
+            padding: 15px 15px 5px;
+            font-weight: 700;
+            color: var(--burg-l);
+            font-size: 1.2rem;
+        }
+        .memory-msg {
+            padding: 0 15px 15px;
+            font-size: 0.95rem;
+            color: var(--cream-d);
+            line-height: 1.6;
+        }
+        
+        /* DELETE BUTTON STYLE */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 77, 77, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.3s;
+            font-size: 1.3rem;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .memory-card:hover .delete-btn {
+            opacity: 1;
+        }
+        .delete-btn:hover {
+            background: #ff2d2d;
+            transform: scale(1.15) rotate(90deg);
+        }
+
+        /* FAB & MODAL */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 65px;
+            height: 65px;
+            background: var(--burg-l);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: var(--t);
+            z-index: 100;
+        }
+        .fab:hover { transform: scale(1.1) rotate(90deg); background: var(--burg); }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+            z-index: 1000;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #251015;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%; max-width: 500px;
+            position: relative;
+            border: 1px solid var(--burg);
+        }
+        .close-modal {
+            position: absolute; top: 20px; left: 20px;
+            font-size: 1.5rem; cursor: pointer; color: var(--cream-d);
+        }
+
+        .form-group { margin-bottom: 20px; text-align: right; }
+        .form-label { display: block; margin-bottom: 8px; color: var(--cream-d); font-size: 0.9rem; }
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            outline: none;
+        }
+        .form-input:focus { border-color: var(--burg-l); }
+        textarea.form-input { height: 100px; resize: none; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--burg-l);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .submit-btn:hover { background: var(--burg); }
+        .submit-btn:disabled { background: #444; cursor: not-allowed; }
+
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000; font-size: 1.2rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .intro-title { font-size: 3rem; }
+            .intro-subtitle { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CINEMATIC INTRO SCREEN -->
+    <div id="intro-screen">
+        <div class="intro-particles" id="particles-container"></div>
+        <div class="intro-content">
+            <div class="intro-line-top"></div>
+            <div class="intro-title">جدار الذكريات</div>
+            <div class="intro-line-top"></div>
+            <div class="intro-subtitle">دفعة 29 — كلية التمريض</div>
+            <div class="intro-line-bottom"></div>
+            <div class="intro-tagline">حفل التخرج 2026</div>
+        </div>
+        <button class="skip-intro-btn" onclick="skipIntro()">تخطي</button>
+    </div>
+
+    <div id="loading-overlay" style="display: none;">جاري تحميل الذكريات...</div>
+
+    <div class="container">
+        <h1>جدار الذكريات</h1>
+        <p class="subtitle">دفعة 29 — كلية التمريض (2026)</p>
+        
+        <div id="memories-container" class="memories-grid">
+            <!-- سيتم تحميل الذكريات هنا -->
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button class="fab" onclick="toggleModal(true)">+</button>
+
+    <!-- Modal Form -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleModal(false)">×</span>
+            <h2 style="font-family:'Amiri',serif; margin-bottom: 20px; color: var(--burg-l);">أضف ذكرى جديدة</h2>
+            
+            <div class="form-group">
+                <label class="form-label">الاسم الكامل</label>
+                <input type="text" id="name-input" class="form-input" placeholder="اكتب اسمك هنا...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">رسالتك / ذكرى</label>
+                <textarea id="message-input" class="form-input" placeholder="اكتب شيئاً للذكرى..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">صورة الذكرى</label>
+                <input type="file" id="photo-input" class="form-input" accept="image/*">
+            </div>
+            
+            <button id="submit-btn" class="submit-btn" onclick="saveMemory()">نشر الذكرى</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://qryfzlsrjbgbalyxdjhd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyeWZ6bHNyamJnYmFseXhkamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzI4MTMsImV4cCI6MjA5MTUwODgxM30.Ezfy8YQU6Mg6Xx70pDPFNOI2spcSGJU9GOb3q6IMr_s';
+
+        // Initialize Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Create particles for intro
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animation = `float ${3 + Math.random() * 2}s ease-in-out infinite`;
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Auto-hide intro after 4 seconds
+        window.onload = () => {
+            createParticles();
+            setTimeout(() => {
+                skipIntro();
+            }, 4000);
+        };
+
+        function skipIntro() {
+            const introScreen = document.getElementById('intro-screen');
+            introScreen.classList.add('hidden');
+            loadMemories();
+        }
+
+        function toggleModal(show) {
+            document.getElementById('add-modal').classList.toggle('active', show);
+        }
+
+        async function loadMemories() {
+            const container = document.getElementById('memories-container');
+            const loader = document.getElementById('loading-overlay');
+            loader.style.display = 'flex';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('memories')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error("Supabase Error:", error);
+                    throw error;
+                }
+
+                container.innerHTML = "";
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = "<p style='grid-column: 1/-1;'>لا توجد ذكريات منشورة بعد. كن أول من يشارك!</p>";
+                } else {
+                    data.forEach(item => {
+                        const card = `
+                            <div class="memory-card" id="memory-${item.id}">
+                                <button class="delete-btn" onclick="deleteMemory('${item.id}', '${item.image_url.replace(/'/g, "\\'")}')">×</button>
+                                <img src="${item.image_url}" class="memory-img" alt="${item.name}">
+                                <div class="memory-name">${item.name}</div>
+                                <div class="memory-msg">${item.message}</div>
+                            </div>
+                        `;
+                        container.innerHTML += card;
+                    });
+                }
+            } catch (err) {
+                console.error("Error loading memories:", err);
+                container.innerHTML = "<p style='grid-column: 1/-1;'>حدث خطأ أثناء تحميل البيانات.</p>";
+            } finally {
+                loader.style.display = "none";
+            }
+        }
+
+        async function saveMemory() {
+            const name = document.getElementById('name-input').value.trim();
+            const msg = document.getElementById('message-input').value.trim();
+            const photoFile = document.getElementById('photo-input').files[0];
+            const btn = document.getElementById('submit-btn');
+
+            if (!name || !msg || !photoFile) {
+                alert("يرجى إكمال جميع البيانات واختيار صورة.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "جاري النشر...";
+
+            try {
+                // 1. Upload Image to Supabase Storage
+                const fileExt = photoFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `public/${fileName}`;
+
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('photos')
+                    .upload(filePath, photoFile);
+
+                if (uploadError) {
+                    console.error("Upload Error:", uploadError);
+                    throw uploadError;
+                }
+
+                // Get Public URL
+                const { data: urlData } = supabaseClient.storage
+                    .from('photos')
+                    .getPublicUrl(filePath);
+                
+                const downloadURL = urlData.publicUrl;
+
+                // 2. Save to Supabase Database
+                const { data: insertData, error: dbError } = await supabaseClient
+                    .from('memories')
+                    .insert([
+                        { name: name, message: msg, image_url: downloadURL }
+                    ])
+                    .select();
+
+                if (dbError) {
+                    console.error("Database Error:", dbError);
+                    throw dbError;
+                }
+
+                alert("تم نشر ذكراك بنجاح!");
+                toggleModal(false);
+                
+                // Reset form
+                document.getElementById('name-input').value = '';
+                document.getElementById('message-input').value = '';
+                document.getElementById('photo-input').value = '';
+                
+                btn.disabled = false;
+                btn.innerText = "نشر الذكرى";
+                
+                loadMemories();
+            } catch (error) {
+                console.error("Error saving memory:", error);
+                alert("حدث خطأ أثناء النشر: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "نشر الذكرى";
+            }
+        }
+
+        async function deleteMemory(id, imageUrl) {
+            if (!confirm("هل أنت متأكد من حذف هذه الذكرى؟")) {
+                return;
+            }
+
+            try {
+                // 1. Delete from Database FIRST
+                const { error: dbError } = await supabaseClient
+                    .from('memories')
+                    .delete()
+                    .eq('id', id);
+
+                if (dbError) {
+                    console.error("Database Delete Error:", dbError);
+                    throw dbError;
+                }
+
+                console.log("Record deleted from database successfully");
+
+                // 2. Delete from Storage (extract filename from URL)
+                try {
+                    const urlParts = imageUrl.split('/');
+                    const fileName = urlParts[urlParts.length - 1];
+                    const filePath = `public/${fileName}`;
+                    
+                    const { error: storageError } = await supabaseClient.storage
+                        .from('photos')
+                        .remove([filePath]);
+
+                    if (storageError) {
+                        console.warn("Storage delete warning:", storageError);
+                        // Don't throw - storage delete is optional
+                    } else {
+                        console.log("File deleted from storage successfully");
+                    }
+                } catch (storageErr) {
+                    console.warn("Storage deletion skipped:", storageErr);
+                }
+
+                alert("تم حذف الذكرى بنجاح.");
+                loadMemories();
+            } catch (error) {
+                console.error("Error deleting memory:", error);
+                alert("حدث خطأ أثناء الحذف: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
