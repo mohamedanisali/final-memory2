@@ -1958,6 +1958,85 @@ footer {
   .cp-name { font-size: 1.9rem; }
   .cp-message { font-size: 0.95rem; }
 }
+/* ========== CROP EDITOR ========== */
+.crop-editor {
+  display: none;
+  margin-top: 14px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid rgba(192,54,90,0.25);
+  background: rgba(0,0,0,0.3);
+}
+.crop-editor.show { display: block; }
+
+.crop-instructions {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(245,237,224,0.45);
+  letter-spacing: 1px;
+  padding: 8px 12px 6px;
+}
+
+.crop-viewport {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  cursor: grab;
+  background: #0a0308;
+  touch-action: none;
+}
+.crop-viewport:active { cursor: grabbing; }
+
+#crop-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+
+.crop-controls {
+  padding: 10px 16px 6px;
+}
+
+.crop-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crop-slider-icon { font-size: 1rem; flex-shrink: 0; }
+.crop-slider-val {
+  font-size: 0.75rem;
+  color: var(--gold);
+  min-width: 38px;
+  text-align: left;
+}
+
+.crop-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(212,175,55,0.2);
+  outline: none;
+  cursor: pointer;
+}
+.crop-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+}
+
+.crop-actions {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px 12px;
+}
+.crop-actions .btn-sm { flex: 1; }
+
 </style>
 </head>
 <body>
@@ -2131,11 +2210,22 @@ footer {
         <div class="upload-sub">JPG, PNG, WEBP — حتى 5MB</div>
       </div>
 
-      <div class="img-preview-wrap" id="preview-wrap">
-        <img id="preview-img" src="" alt="معاينة">
-        <div class="img-preview-actions">
-          <button class="btn-sm btn-confirm" onclick="confirmImg()">✓ تأكيد الصورة</button>
-          <button class="btn-sm btn-reupload" onclick="resetImg()">↩ تغيير</button>
+      <!-- Crop Editor -->
+      <div class="crop-editor" id="crop-editor">
+        <div class="crop-instructions">اسحب الصورة • قرّب وبعّد • ابعد الجزء اللي عايزه</div>
+        <div class="crop-viewport" id="crop-viewport">
+          <canvas id="crop-canvas"></canvas>
+        </div>
+        <div class="crop-controls">
+          <div class="crop-slider-row">
+            <span class="crop-slider-icon">🔍</span>
+            <input type="range" id="crop-zoom" min="50" max="300" value="100" class="crop-slider">
+            <span class="crop-slider-val" id="crop-zoom-val">100%</span>
+          </div>
+        </div>
+        <div class="crop-actions">
+          <button class="btn-sm btn-confirm" onclick="applyCrop()">✓ تأكيد القص</button>
+          <button class="btn-sm btn-reupload" onclick="resetImg()">↩ تغيير الصورة</button>
         </div>
       </div>
     </div>
@@ -2601,7 +2691,16 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-// ======== FILE HANDLING ========
+// ======== CROP EDITOR ========
+let cropImg = null;
+let cropX = 0, cropY = 0;
+let cropZoom = 1;
+let cropDragging = false;
+let cropDragStart = { x: 0, y: 0 };
+let cropLastTouch = null;
+let cropPinchDist = null;
+let croppedDataUrl = null;
+
 function onFileChange(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -2611,23 +2710,147 @@ function onFileChange(e) {
   }
   const reader = new FileReader();
   reader.onload = ev => {
-    document.getElementById('preview-img').src = ev.target.result;
-    document.getElementById('preview-wrap').classList.add('show');
-    document.getElementById('upload-zone').style.opacity = '0.5';
-    imgConfirmed = false;
+    const img = new Image();
+    img.onload = () => {
+      cropImg = img;
+      cropZoom = 1;
+      // توسيط الصورة
+      const vp = document.getElementById('crop-viewport');
+      cropX = (vp.offsetWidth  - img.width)  / 2;
+      cropY = (vp.offsetHeight - img.height) / 2;
+      document.getElementById('crop-zoom').value = 100;
+      document.getElementById('crop-zoom-val').textContent = '100%';
+      document.getElementById('upload-zone').style.opacity = '0.4';
+      document.getElementById('crop-editor').classList.add('show');
+      croppedDataUrl = null;
+      imgConfirmed = false;
+      drawCrop();
+      initCropEvents();
+    };
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function confirmImg() {
+function drawCrop() {
+  if (!cropImg) return;
+  const vp   = document.getElementById('crop-viewport');
+  const canvas = document.getElementById('crop-canvas');
+  const W = vp.offsetWidth, H = vp.offsetHeight;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  const dw = cropImg.width  * cropZoom;
+  const dh = cropImg.height * cropZoom;
+  ctx.drawImage(cropImg, cropX, cropY, dw, dh);
+
+  // إطار التوجيه
+  ctx.strokeStyle = 'rgba(212,175,55,0.5)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeRect(W * 0.05, H * 0.05, W * 0.9, H * 0.9);
+  ctx.setLineDash([]);
+}
+
+function initCropEvents() {
+  const vp = document.getElementById('crop-viewport');
+  // تجنب إضافة listeners أكثر من مرة
+  vp.onmousedown = e => {
+    cropDragging = true;
+    cropDragStart = { x: e.clientX - cropX, y: e.clientY - cropY };
+  };
+  window.onmousemove = e => {
+    if (!cropDragging) return;
+    cropX = e.clientX - cropDragStart.x;
+    cropY = e.clientY - cropDragStart.y;
+    drawCrop();
+  };
+  window.onmouseup = () => { cropDragging = false; };
+
+  // Touch: سحب
+  vp.ontouchstart = e => {
+    if (e.touches.length === 1) {
+      cropDragging = true;
+      cropDragStart = {
+        x: e.touches[0].clientX - cropX,
+        y: e.touches[0].clientY - cropY
+      };
+      cropPinchDist = null;
+    } else if (e.touches.length === 2) {
+      cropDragging = false;
+      cropPinchDist = getTouchDist(e.touches);
+    }
+  };
+  vp.ontouchmove = e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && cropDragging) {
+      cropX = e.touches[0].clientX - cropDragStart.x;
+      cropY = e.touches[0].clientY - cropDragStart.y;
+      drawCrop();
+    } else if (e.touches.length === 2 && cropPinchDist) {
+      const newDist = getTouchDist(e.touches);
+      const ratio = newDist / cropPinchDist;
+      cropZoom = Math.min(3, Math.max(0.5, cropZoom * ratio));
+      cropPinchDist = newDist;
+      document.getElementById('crop-zoom').value = Math.round(cropZoom * 100);
+      document.getElementById('crop-zoom-val').textContent = Math.round(cropZoom * 100) + '%';
+      drawCrop();
+    }
+  };
+  vp.ontouchend = () => { cropDragging = false; cropPinchDist = null; };
+
+  // Zoom slider
+  document.getElementById('crop-zoom').oninput = function() {
+    cropZoom = this.value / 100;
+    document.getElementById('crop-zoom-val').textContent = this.value + '%';
+    drawCrop();
+  };
+}
+
+function getTouchDist(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function applyCrop() {
+  if (!cropImg) return;
+  const vp = document.getElementById('crop-viewport');
+  const W = vp.offsetWidth, H = vp.offsetHeight;
+
+  // اعمل canvas بنسبة 1:1 جودة عالية
+  const out = document.createElement('canvas');
+  out.width  = W * 2;
+  out.height = H * 2;
+  const ctx = out.getContext('2d');
+  ctx.scale(2, 2);
+  const dw = cropImg.width  * cropZoom;
+  const dh = cropImg.height * cropZoom;
+  ctx.drawImage(cropImg, cropX, cropY, dw, dh);
+
+  croppedDataUrl = out.toDataURL('image/jpeg', 0.92);
   imgConfirmed = true;
   showToast('تم تأكيد الصورة ✓');
+
+  // أظهر preview صغيرة تحت الـ crop
+  document.getElementById('crop-editor').style.opacity = '0.7';
+  document.getElementById('crop-editor').style.pointerEvents = 'none';
+  showToast('الصورة جاهزة للنشر ✓');
+}
+
+function confirmImg() {
+  applyCrop();
 }
 
 function resetImg() {
   document.getElementById('inp-file').value = '';
-  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('crop-editor').classList.remove('show');
+  document.getElementById('crop-editor').style.opacity = '';
+  document.getElementById('crop-editor').style.pointerEvents = '';
   document.getElementById('upload-zone').style.opacity = '1';
+  cropImg = null;
+  croppedDataUrl = null;
   imgConfirmed = false;
 }
 
@@ -2767,31 +2990,38 @@ async function saveMemory() {
     // ======= الخطوة 1: رفع الصورة =======
     let imageUrl = '';
 
-    // حاول Supabase Storage
-    try {
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${path}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': file.type || 'image/jpeg',
-          'x-upsert': 'true'
-        },
-        body: file
-      });
-      if (uploadRes.ok) {
-        imageUrl = `${SUPABASE_URL}/storage/v1/object/public/photos/${path}`;
-      }
-    } catch (_) { /* Storage غير متاح */ }
-
-    // Fallback: base64 محلياً
-    if (!imageUrl) {
-      imageUrl = await new Promise(resolve => {
+    // لو فيه صورة مقصوصة استخدمها، غير كده حوّل الملف
+    let imageData = croppedDataUrl;
+    if (!imageData) {
+      imageData = await new Promise(resolve => {
         const r = new FileReader();
         r.onload = e => resolve(e.target.result);
         r.onerror = () => resolve('');
         r.readAsDataURL(file);
       });
+    }
+
+    // حاول Supabase Storage — ارفع كـ blob من base64
+    try {
+      const blob = await fetch(imageData).then(r => r.blob());
+      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${path}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': blob.type || 'image/jpeg',
+          'x-upsert': 'true'
+        },
+        body: blob
+      });
+      if (uploadRes.ok) {
+        imageUrl = `${SUPABASE_URL}/storage/v1/object/public/photos/${path}`;
+      }
+    } catch (_) {}
+
+    // Fallback: استخدم الـ base64 مباشرة
+    if (!imageUrl) {
+      imageUrl = imageData;
     }
 
     // ======= الخطوة 2: حفظ الذكرى =======
@@ -2840,8 +3070,12 @@ function resetForm() {
   document.getElementById('inp-name').value = '';
   document.getElementById('inp-msg').value = '';
   document.getElementById('inp-file').value = '';
-  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('crop-editor').classList.remove('show');
+  document.getElementById('crop-editor').style.opacity = '';
+  document.getElementById('crop-editor').style.pointerEvents = '';
   document.getElementById('upload-zone').style.opacity = '1';
+  cropImg = null;
+  croppedDataUrl = null;
   imgConfirmed = false;
 }
 
