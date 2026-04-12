@@ -1,605 +1,1649 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جدار ذكريات دفعة 29 — كلية التمريض</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدار ذكريات دفعة 29 — كلية التمريض</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        :root {
-            --bg: #1c0a0e;
-            --burg: #7a1e3c;
-            --burg-l: #b03055;
-            --cream: #f5ede0;
-            --cream-d: rgba(245,237,224,0.7);
-            --gold: #d4af37;
-            --t: 0.4s cubic-bezier(0.22,1,0.36,1);
-        }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        body{
-            font-family:'Tajawal',sans-serif;
-            background: var(--bg);
-            color: var(--cream);
-            overflow-x: hidden;
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-        .container { max-width: 1200px; margin: 0 auto; text-align: center; }
-        h1 { font-family: 'Amiri', serif; font-size: 3.5rem; color: var(--burg-l); margin-bottom: 10px; }
-        p.subtitle { color: var(--cream-d); margin-bottom: 40px; font-size: 1.1rem; }
+<style>
+:root {
+  --bg: #100508;
+  --bg2: #160b0f;
+  --burg: #7a1e3c;
+  --burg-l: #c0365a;
+  --burg-glow: rgba(192,54,90,0.35);
+  --cream: #f5ede0;
+  --cream-d: rgba(245,237,224,0.6);
+  --cream-dd: rgba(245,237,224,0.25);
+  --gold: #d4af37;
+  --gold-glow: rgba(212,175,55,0.25);
+  --t: 0.45s cubic-bezier(0.22,1,0.36,1);
+  --t-fast: 0.25s cubic-bezier(0.22,1,0.36,1);
+}
 
-        /* --- INTRO STYLES (CINEMATIC) --- */
-        #intro-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #0a0505 0%, #1c0a0e 50%, #2d1520 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 1s ease 3.5s, visibility 1s ease 3.5s;
-            opacity: 1;
-            visibility: visible;
-        }
-        #intro-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Background particles effect */
-        .intro-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--gold);
-            border-radius: 50%;
-            opacity: 0.6;
-        }
+html { scroll-behavior: smooth; }
 
-        .intro-content {
-            text-align: center;
-            z-index: 10;
-            position: relative;
-        }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--cream);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
 
-        /* Main Title Animation */
-        .intro-title {
-            font-family: 'Amiri', serif;
-            font-size: 5rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 30px;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(176, 48, 85, 0.3);
-            opacity: 0;
-            animation: titleGlowIn 2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
-            letter-spacing: 3px;
-        }
+/* ========== TEXTURE OVERLAY ========== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 9998;
+}
 
-        /* Decorative Line */
-        .intro-line-top {
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 20px auto;
-            animation: expandLineTop 1.5s ease 2s forwards;
-        }
+/* ========== INTRO ========== */
+#intro {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, #2a0d18 0%, #0a0306 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  transition: opacity 1.2s ease, transform 1.2s ease;
+  overflow: hidden;
+}
 
-        /* Subtitle */
-        .intro-subtitle {
-            font-size: 1.8rem;
-            color: var(--cream);
-            letter-spacing: 4px;
-            margin: 20px 0;
-            opacity: 0;
-            animation: subtitleFadeIn 1.5s ease 2.5s forwards;
-            font-weight: 300;
-        }
+#intro.fade-out {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
 
-        /* Decorative Line Bottom */
-        .intro-line-bottom {
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--burg-l), transparent);
-            margin: 20px auto;
-            animation: expandLineBottom 1.5s ease 3s forwards;
-        }
+.intro-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.orb1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(122,30,60,0.4) 0%, transparent 70%);
+  top: -200px; right: -150px;
+  animation: orbFloat 18s ease-in-out infinite;
+}
+.orb2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
+  bottom: -150px; left: -100px;
+  animation: orbFloat 24s ease-in-out infinite reverse;
+}
+.orb3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(192,54,90,0.2) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbPulse 6s ease-in-out infinite;
+}
 
-        /* Tagline */
-        .intro-tagline {
-            font-size: 1.2rem;
-            color: var(--cream-d);
-            margin-top: 30px;
-            opacity: 0;
-            animation: taglineFadeIn 1.5s ease 3.2s forwards;
-            font-style: italic;
-        }
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(40px, -40px) rotate(5deg); }
+  66% { transform: translate(-20px, -60px) rotate(-3deg); }
+}
+@keyframes orbPulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+}
 
-        /* Skip Button */
-        .skip-intro-btn {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            padding: 10px 20px;
-            background: rgba(212, 175, 55, 0.2);
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            opacity: 0;
-            animation: fadeInUp 1s ease 2s forwards;
-        }
-        .skip-intro-btn:hover {
-            background: rgba(212, 175, 55, 0.4);
-        }
+/* Floating particles */
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.p {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pRise linear infinite;
+}
+@keyframes pRise {
+  0% { opacity: 0; transform: translateY(100vh) translateX(0); }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-20px) translateX(60px); }
+}
 
-        @keyframes titleGlowIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.5) translateY(50px);
-                text-shadow: 0 0 0 rgba(212, 175, 55, 0);
-            }
-            50% {
-                text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-                text-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 0 40px rgba(176, 48, 85, 0.3);
-            }
-        }
+.intro-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
+}
 
-        @keyframes expandLineTop {
-            to { width: 300px; }
-        }
+.intro-year {
+  font-family: 'Amiri', serif;
+  font-size: clamp(5rem, 18vw, 12rem);
+  font-weight: 700;
+  line-height: 0.85;
+  background: linear-gradient(145deg, #f0d060 0%, var(--gold) 40%, #b8960a 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 6px;
+  opacity: 0;
+  transform: translateY(-40px);
+  animation: dropIn 1s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards;
+  filter: drop-shadow(0 0 30px rgba(212,175,55,0.4));
+}
 
-        @keyframes expandLineBottom {
-            to { width: 250px; }
-        }
+.intro-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 28px auto;
+  animation: lineGrow 1s ease 1.4s forwards;
+}
 
-        @keyframes subtitleFadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.intro-college {
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+  font-weight: 300;
+  letter-spacing: 5px;
+  color: var(--cream);
+  opacity: 0;
+  animation: fadeUp 0.8s ease 1.6s forwards;
+  text-transform: uppercase;
+}
 
-        @keyframes taglineFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+.intro-batch {
+  font-family: 'Amiri', serif;
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  color: var(--burg-l);
+  margin-top: 16px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 2s forwards;
+}
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.intro-uni {
+  font-size: 1rem;
+  color: var(--cream-d);
+  letter-spacing: 3px;
+  margin-top: 10px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 2.4s forwards;
+}
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
+.intro-message {
+  font-family: 'Amiri', serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  color: var(--cream);
+  margin-top: 50px;
+  min-height: 70px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 3.2s forwards;
+  line-height: 1.8;
+}
 
-        /* --- END INTRO STYLES --- */
+.cursor-blink::after {
+  content: '|';
+  animation: blink 0.7s step-end infinite;
+  color: var(--gold);
+  margin-right: 2px;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* MEMORIES GRID */
-        .memories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 20px 0;
-        }
-        .memory-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 15px;
-            overflow: hidden;
-            transition: var(--t);
-            position: relative;
-            animation: fadeIn 0.8s ease forwards;
-        }
-        .memory-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--burg-l);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-        }
-        .memory-img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            filter: grayscale(30%);
-            transition: var(--t);
-        }
-        .memory-card:hover .memory-img { filter: grayscale(0%); }
-        .memory-name {
-            padding: 15px 15px 5px;
-            font-weight: 700;
-            color: var(--burg-l);
-            font-size: 1.2rem;
-        }
-        .memory-msg {
-            padding: 0 15px 15px;
-            font-size: 0.95rem;
-            color: var(--cream-d);
-            line-height: 1.6;
-        }
-        
-        /* DELETE BUTTON STYLE */
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 77, 77, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: 0.3s;
-            font-size: 1.3rem;
-            font-weight: bold;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .memory-card:hover .delete-btn {
-            opacity: 1;
-        }
-        .delete-btn:hover {
-            background: #ff2d2d;
-            transform: scale(1.15) rotate(90deg);
-        }
+.intro-enter-btn {
+  margin-top: 50px;
+  padding: 16px 48px;
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  border-radius: 50px;
+  cursor: pointer;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 4.5s forwards;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease, box-shadow 0.3s ease;
+}
+.intro-enter-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  z-index: -1;
+}
+.intro-enter-btn:hover::before { transform: scaleX(1); }
+.intro-enter-btn:hover { color: #1a0608; box-shadow: 0 0 40px var(--gold-glow); }
 
-        /* FAB & MODAL */
-        .fab {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            width: 65px;
-            height: 65px;
-            background: var(--burg-l);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 2rem;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: var(--t);
-            z-index: 100;
-        }
-        .fab:hover { transform: scale(1.1) rotate(90deg); background: var(--burg); }
+.intro-skip {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  background: none;
+  border: none;
+  color: var(--cream-dd);
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  letter-spacing: 2px;
+  opacity: 0;
+  animation: fadeUp 0.5s ease 5s forwards;
+  transition: color 0.3s;
+}
+.intro-skip:hover { color: var(--cream-d); }
 
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: 0.3s;
-            z-index: 1000;
-        }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-content {
-            background: #251015;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%; max-width: 500px;
-            position: relative;
-            border: 1px solid var(--burg);
-        }
-        .close-modal {
-            position: absolute; top: 20px; left: 20px;
-            font-size: 1.5rem; cursor: pointer; color: var(--cream-d);
-        }
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-40px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lineGrow {
+  to { width: 200px; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-        .form-group { margin-bottom: 20px; text-align: right; }
-        .form-label { display: block; margin-bottom: 8px; color: var(--cream-d); font-size: 0.9rem; }
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: white;
-            font-family: inherit;
-            outline: none;
-        }
-        .form-input:focus { border-color: var(--burg-l); }
-        textarea.form-input { height: 100px; resize: none; }
+/* ========== MAIN PAGE ========== */
+#main {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+#main.visible { opacity: 1; }
 
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: var(--burg-l);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .submit-btn:hover { background: var(--burg); }
-        .submit-btn:disabled { background: #444; cursor: not-allowed; }
+/* ========== HERO HEADER ========== */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 80px 20px 60px;
+  overflow: hidden;
+}
 
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2000; font-size: 1.2rem;
-        }
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(122,30,60,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 24px;
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 50px;
+  color: var(--gold);
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+  background: rgba(212,175,55,0.05);
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
+  50% { box-shadow: 0 0 20px rgba(212,175,55,0.15); }
+}
 
-        @media (max-width: 768px) {
-            .intro-title { font-size: 3rem; }
-            .intro-subtitle { font-size: 1.3rem; }
-        }
-    </style>
+.hero-title {
+  font-family: 'Amiri', serif;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.hero-title span {
+  background: linear-gradient(135deg, var(--burg-l), #e05070);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: var(--cream-d);
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+.hero-divider {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--burg-l), transparent);
+  margin: 30px auto;
+}
+
+/* ========== STATS BAR ========== */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  max-width: 500px;
+  margin: 0 auto 60px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.02);
+}
+
+.stat-item {
+  flex: 1;
+  padding: 18px 10px;
+  text-align: center;
+  border-left: 1px solid rgba(255,255,255,0.07);
+}
+.stat-item:last-child { border-left: none; }
+
+.stat-num {
+  font-family: 'Amiri', serif;
+  font-size: 2rem;
+  color: var(--gold);
+  line-height: 1;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--cream-dd);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ========== ADD MEMORY CTA ========== */
+.add-cta {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60px;
+  padding: 0 20px;
+}
+
+.add-cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 40px;
+  background: linear-gradient(135deg, var(--burg) 0%, var(--burg-l) 100%);
+  color: white;
+  border: none;
+  border-radius: 60px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 40px rgba(122,30,60,0.5), 0 0 0 1px rgba(192,54,90,0.3);
+  transition: var(--t);
+  position: relative;
+  overflow: hidden;
+}
+
+.add-cta-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.add-cta-btn:hover::before { opacity: 1; }
+.add-cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 60px rgba(122,30,60,0.6), 0 0 0 1px rgba(192,54,90,0.5);
+}
+.add-cta-btn:active { transform: translateY(-1px); }
+
+.add-cta-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  transition: transform 0.3s;
+}
+.add-cta-btn:hover .add-cta-icon { transform: rotate(90deg); }
+
+/* ========== MEMORIES GRID ========== */
+.section-label {
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 5px;
+  color: var(--cream-dd);
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.grid-wrap {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+#memories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* ========== MEMORY CARD ========== */
+.memory-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  transition: var(--t);
+  animation: cardIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  cursor: pointer;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.memory-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(192,54,90,0.4);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(192,54,90,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.card-img-wrap {
+  position: relative;
+  overflow: hidden;
+  height: 260px;
+}
+
+.card-img-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(16,5,8,0.9));
+}
+
+.memory-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.7) brightness(0.9);
+  transition: var(--t);
+}
+
+.memory-card:hover .memory-img {
+  filter: saturate(1) brightness(1);
+  transform: scale(1.05);
+}
+
+.card-body {
+  padding: 20px 20px 22px;
+}
+
+.memory-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--cream);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-name-dot {
+  width: 6px; height: 6px;
+  background: var(--burg-l);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.memory-msg {
+  font-size: 0.9rem;
+  color: var(--cream-d);
+  line-height: 1.7;
+}
+
+.card-date {
+  font-size: 0.72rem;
+  color: var(--cream-dd);
+  margin-top: 14px;
+  letter-spacing: 1px;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 32px; height: 32px;
+  background: rgba(220,50,50,0.85);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: var(--t-fast);
+  z-index: 10;
+}
+
+.memory-card:hover .delete-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.delete-btn:hover {
+  background: #e82020;
+  transform: scale(1.1) rotate(90deg) !important;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.4;
+}
+
+.empty-title {
+  font-family: 'Amiri', serif;
+  font-size: 2rem;
+  color: var(--cream-d);
+  margin-bottom: 12px;
+}
+
+.empty-sub {
+  color: var(--cream-dd);
+  font-size: 0.95rem;
+}
+
+/* ========== LOADER ========== */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 8000;
+  transition: opacity 0.5s ease;
+}
+#page-loader.hidden { opacity: 0; pointer-events: none; }
+
+.loader-ring {
+  width: 50px; height: 50px;
+  border: 2px solid rgba(212,175,55,0.1);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  color: var(--cream-dd);
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ========== MODAL ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: #1c0b10;
+  border: 1px solid rgba(192,54,90,0.3);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateY(30px) scale(0.97);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+  opacity: 0;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.modal-overlay.active .modal-box {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.modal-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-title {
+  font-family: 'Amiri', serif;
+  font-size: 1.8rem;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+
+.modal-sub {
+  font-size: 0.85rem;
+  color: var(--cream-dd);
+  letter-spacing: 1px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--cream-d);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--t-fast);
+}
+.modal-close:hover { background: rgba(220,50,50,0.2); border-color: rgba(220,50,50,0.4); color: #ff6b6b; }
+
+/* Form */
+.field {
+  margin-bottom: 22px;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--cream-dd);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.field-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: var(--cream);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.field-input:focus {
+  border-color: var(--burg-l);
+  box-shadow: 0 0 0 3px rgba(192,54,90,0.1);
+}
+.field-input::placeholder { color: rgba(245,237,224,0.2); }
+
+textarea.field-input {
+  height: 110px;
+  resize: none;
+  line-height: 1.6;
+}
+
+/* File upload zone */
+.upload-zone {
+  border: 1.5px dashed rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--t-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--burg-l);
+  background: rgba(192,54,90,0.05);
+}
+
+.upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.upload-icon { font-size: 2rem; margin-bottom: 10px; }
+.upload-text { font-size: 0.85rem; color: var(--cream-d); }
+.upload-sub { font-size: 0.75rem; color: var(--cream-dd); margin-top: 4px; }
+
+/* Preview */
+.img-preview-wrap {
+  display: none;
+  margin-top: 16px;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.img-preview-wrap.show { display: block; }
+
+.img-preview-wrap img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.img-preview-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-sm {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, var(--burg), var(--burg-l));
+  color: white;
+}
+.btn-confirm:hover { opacity: 0.85; }
+
+.btn-reupload {
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.3);
+  color: var(--gold);
+}
+.btn-reupload:hover { background: rgba(212,175,55,0.18); }
+
+/* Submit */
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--burg) 0%, var(--burg-l) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: var(--t);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 1px;
+}
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: 0.3s;
+}
+.submit-btn:hover::after { opacity: 1; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(122,30,60,0.5); }
+.submit-btn:disabled { background: #333; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ========== TOAST NOTIFICATION ========== */
+#toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1e1015;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--cream);
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  z-index: 9999;
+  transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+  opacity: 0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+#toast.success { border-color: rgba(80,200,120,0.4); }
+#toast.error { border-color: rgba(220,80,80,0.4); }
+
+/* ========== CONFIRM DIALOG ========== */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  padding: 20px;
+}
+.confirm-overlay.active { opacity: 1; pointer-events: all; }
+
+.confirm-box {
+  background: #1c0b10;
+  border: 1px solid rgba(220,80,80,0.3);
+  border-radius: 20px;
+  padding: 35px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.confirm-overlay.active .confirm-box { transform: scale(1); }
+
+.confirm-icon { font-size: 2.5rem; margin-bottom: 16px; }
+.confirm-title { font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--cream); margin-bottom: 10px; }
+.confirm-sub { color: var(--cream-d); font-size: 0.9rem; margin-bottom: 24px; }
+
+.confirm-btns { display: flex; gap: 12px; }
+.btn-danger {
+  flex: 1; padding: 13px;
+  background: rgba(220,50,50,0.9);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 0.95rem;
+}
+.btn-danger:hover { background: #e03030; }
+
+.btn-cancel {
+  flex: 1; padding: 13px;
+  background: rgba(255,255,255,0.05);
+  color: var(--cream-d);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-cancel:hover { background: rgba(255,255,255,0.09); }
+
+/* ========== FOOTER ========== */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--cream-dd);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ========== CELEBRATION POPUP ========== */
+.celeb-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 7000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  padding: 20px;
+}
+.celeb-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.celeb-box {
+  background: linear-gradient(160deg, #200d14 0%, #160810 100%);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 28px;
+  padding: 50px 40px 44px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.85) translateY(30px);
+  transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+  opacity: 0;
+  box-shadow: 0 60px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.celeb-overlay.active .celeb-box {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* Shimmer bg */
+.celeb-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Confetti particles inside popup */
+.celeb-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.conf-dot {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  animation: confFall linear forwards;
+  opacity: 0;
+}
+@keyframes confFall {
+  0%   { opacity: 1; transform: translateY(-10px) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(300px) rotate(360deg); }
+}
+
+.celeb-icon {
+  font-size: 3.8rem;
+  display: block;
+  margin-bottom: 20px;
+  animation: celebIconBounce 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+}
+@keyframes celebIconBounce {
+  from { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.celeb-title {
+  font-family: 'Amiri', serif;
+  font-size: 1.5rem;
+  color: var(--cream-d);
+  font-weight: 400;
+  letter-spacing: 1px;
+  animation: fadeUp 0.6s ease 0.5s both;
+}
+
+.celeb-name {
+  font-family: 'Amiri', serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0d060, var(--gold), #c9a230);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 10px 0 16px;
+  line-height: 1.2;
+  animation: fadeUp 0.6s ease 0.65s both;
+  filter: drop-shadow(0 0 20px rgba(212,175,55,0.3));
+}
+
+.celeb-divider {
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 20px;
+  animation: lineGrow 0.8s ease 0.8s both;
+}
+
+.celeb-msg {
+  color: var(--cream-d);
+  font-size: 1rem;
+  line-height: 1.8;
+  animation: fadeUp 0.6s ease 0.9s both;
+}
+
+.celeb-close {
+  margin-top: 32px;
+  padding: 13px 40px;
+  background: transparent;
+  border: 1.5px solid rgba(212,175,55,0.4);
+  color: var(--gold);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: var(--t-fast);
+  animation: fadeUp 0.6s ease 1.1s both;
+  position: relative;
+  overflow: hidden;
+}
+.celeb-close::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  z-index: -1;
+}
+.celeb-close:hover::before { transform: scaleX(1); }
+.celeb-close:hover { color: #1a0608; border-color: var(--gold); }
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--burg); border-radius: 2px; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .stats-bar { flex-direction: row; }
+  .modal-box { padding: 28px 22px; }
+  #memories-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 
-    <!-- CINEMATIC INTRO SCREEN -->
-    <div id="intro-screen">
-        <div class="intro-particles" id="particles-container"></div>
-        <div class="intro-content">
-            <div class="intro-line-top"></div>
-            <div class="intro-title">جدار الذكريات</div>
-            <div class="intro-line-top"></div>
-            <div class="intro-subtitle">دفعة 29 — كلية التمريض</div>
-            <div class="intro-line-bottom"></div>
-            <div class="intro-tagline">حفل التخرج 2026</div>
-        </div>
-        <button class="skip-intro-btn" onclick="skipIntro()">تخطي</button>
+<!-- Page loader -->
+<div id="page-loader">
+  <div class="loader-ring"></div>
+  <div class="loader-text">جاري التحميل</div>
+</div>
+
+<!-- ======== INTRO SCREEN ======== -->
+<div id="intro">
+  <div class="intro-orb orb1"></div>
+  <div class="intro-orb orb2"></div>
+  <div class="intro-orb orb3"></div>
+  <div class="particles" id="particles-wrap"></div>
+
+  <div class="intro-content">
+    <div class="intro-year">2026</div>
+    <div class="intro-line"></div>
+    <div class="intro-college">كلية التمريض</div>
+    <div class="intro-batch">🎓 دفعة 29</div>
+    <div class="intro-uni">جامعة المنصورة</div>
+    <div class="intro-message cursor-blink" id="intro-msg"></div>
+    <button class="intro-enter-btn" id="enter-btn" onclick="enterSite()">ادخل الجدار ✦</button>
+  </div>
+
+  <button class="intro-skip" onclick="enterSite()">تخطي ←</button>
+</div>
+
+<!-- ======== MAIN CONTENT ======== -->
+<div id="main">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-badge">✦ &nbsp; ذكريات لا تُنسى &nbsp; ✦</div>
+    <h1 class="hero-title">جدار <span>الذكريات</span></h1>
+    <div class="hero-divider"></div>
+    <p class="hero-sub">دفعة 29 &nbsp;—&nbsp; كلية التمريض &nbsp;—&nbsp; 2026</p>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="count-stat">0</div>
+      <div class="stat-label">ذكرى</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">29</div>
+      <div class="stat-label">دفعة</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">لحظة</div>
+    </div>
+  </div>
+
+  <!-- Add CTA -->
+  <div class="add-cta">
+    <button class="add-cta-btn" onclick="openModal()">
+      <div class="add-cta-icon">+</div>
+      سجّل ذكراك 🕊️
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrap">
+    <div class="section-label">— الذكريات المشتركة —</div>
+    <div id="memories-grid"></div>
+  </div>
+
+  <footer>
+    دفعة 29 &nbsp;·&nbsp; كلية التمريض &nbsp;·&nbsp; جامعة المنصورة &nbsp;·&nbsp; 2026
+  </footer>
+</div>
+
+<!-- ======== MODAL ======== -->
+<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-title">أضف ذكرتك ✨</div>
+      <div class="modal-sub">شارك لحظة ستبقى للأبد</div>
     </div>
 
-    <div id="loading-overlay" style="display: none;">جاري تحميل الذكريات...</div>
-
-    <div class="container">
-        <h1>جدار الذكريات</h1>
-        <p class="subtitle">دفعة 29 — كلية التمريض (2026)</p>
-        
-        <div id="memories-container" class="memories-grid">
-            <!-- سيتم تحميل الذكريات هنا -->
-        </div>
+    <div class="field">
+      <label class="field-label">الاسم الكامل</label>
+      <input type="text" id="inp-name" class="field-input" placeholder="اسمك هنا...">
     </div>
 
-    <!-- Floating Button -->
-    <button class="fab" onclick="toggleModal(true)">+</button>
-
-    <!-- Modal Form -->
-    <div id="add-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="toggleModal(false)">×</span>
-            <h2 style="font-family:'Amiri',serif; margin-bottom: 20px; color: var(--burg-l);">أضف ذكرى جديدة</h2>
-            
-            <div class="form-group">
-                <label class="form-label">الاسم الكامل</label>
-                <input type="text" id="name-input" class="form-input" placeholder="اكتب اسمك هنا...">
-            </div>
-            <div class="form-group">
-                <label class="form-label">رسالتك / ذكرى</label>
-                <textarea id="message-input" class="form-input" placeholder="اكتب شيئاً للذكرى..."></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">صورة الذكرى</label>
-                <input type="file" id="photo-input" class="form-input" accept="image/*">
-            </div>
-            
-            <button id="submit-btn" class="submit-btn" onclick="saveMemory()">نشر الذكرى</button>
-        </div>
+    <div class="field">
+      <label class="field-label">رسالتك أو ذكراك</label>
+      <textarea id="inp-msg" class="field-input" placeholder="اكتب شيئاً يبقى في القلب..."></textarea>
     </div>
 
-    <script>
-        // --- CONFIGURATION ---
-        const SUPABASE_URL = 'https://qryfzlsrjbgbalyxdjhd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyeWZ6bHNyamJnYmFseXhkamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzI4MTMsImV4cCI6MjA5MTUwODgxM30.Ezfy8YQU6Mg6Xx70pDPFNOI2spcSGJU9GOb3q6IMr_s';
+    <div class="field">
+      <label class="field-label">صورة الذكرى</label>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="inp-file" accept="image/*" onchange="onFileChange(event)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">اضغط أو اسحب صورتك هنا</div>
+        <div class="upload-sub">JPG, PNG, WEBP — حتى 5MB</div>
+      </div>
 
-        // Initialize Supabase
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      <div class="img-preview-wrap" id="preview-wrap">
+        <img id="preview-img" src="" alt="معاينة">
+        <div class="img-preview-actions">
+          <button class="btn-sm btn-confirm" onclick="confirmImg()">✓ تأكيد الصورة</button>
+          <button class="btn-sm btn-reupload" onclick="resetImg()">↩ تغيير</button>
+        </div>
+      </div>
+    </div>
 
-        // Create particles for intro
-        function createParticles() {
-            const container = document.getElementById('particles-container');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animation = `float ${3 + Math.random() * 2}s ease-in-out infinite`;
-                particle.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(particle);
-            }
-        }
+    <button class="submit-btn" id="submit-btn" onclick="saveMemory()">نشر الذكرى 🕊️</button>
+  </div>
+</div>
 
-        // Auto-hide intro after 4 seconds
-        window.onload = () => {
-            createParticles();
-            setTimeout(() => {
-                skipIntro();
-            }, 4000);
+<!-- ======== CONFIRM DELETE ======== -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">حذف الذكرى؟</div>
+    <div class="confirm-sub">هذا الإجراء لا يمكن التراجع عنه</div>
+    <div class="confirm-btns">
+      <button class="btn-danger" id="confirm-yes">نعم، احذف</button>
+      <button class="btn-cancel" onclick="closeConfirm()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== CELEBRATION POPUP ======== -->
+<div class="celeb-overlay" id="celeb-overlay" onclick="closeCeleb()">
+  <div class="celeb-box" onclick="event.stopPropagation()">
+    <div class="celeb-confetti" id="celeb-confetti"></div>
+    <span class="celeb-icon">🕊️</span>
+    <div class="celeb-title">شكراً لك يا</div>
+    <div class="celeb-name" id="celeb-name"></div>
+    <div class="celeb-divider"></div>
+    <div class="celeb-msg">ذكرتك أصبحت جزءاً من جدار دفعة 29<br>لحظة ستبقى للأبد ✨</div>
+    <button class="celeb-close" onclick="closeCeleb()">تمام 💛</button>
+  </div>
+</div>
+
+<!-- ======== TOAST ======== -->
+<div id="toast"></div>
+
+<script>
+// ======== CONFIG ========
+const SUPABASE_URL = 'https://qryfzlsrjbgbalyxdjhd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyeWZ6bHNyamJnYmFseXhkamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzI4MTMsImV4cCI6MjA5MTUwODgxM30.Ezfy8YQU6Mg6Xx70pDPFNOI2spcSGJU9GOb3q6IMr_s';
+
+// ======== STATE ========
+let mockMemories = JSON.parse(localStorage.getItem('mockMemories') || '[]');
+let pendingDeleteId = null;
+let pendingDeleteUrl = null;
+let imgConfirmed = false;
+
+// ======== PARTICLES ========
+function createParticles() {
+  const wrap = document.getElementById('particles-wrap');
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'p';
+    const size = 1 + Math.random() * 3;
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size}px;
+      opacity: ${0.3 + Math.random() * 0.5};
+      animation-duration: ${12 + Math.random() * 15}s;
+      animation-delay: ${Math.random() * 10}s;
+    `;
+    wrap.appendChild(p);
+  }
+}
+
+// ======== TYPING EFFECT ========
+const phrases = [
+  "كل ذكرى تحكي قصة...",
+  "لحظات لن تُنسى أبداً 💛",
+  "دفعة 29 — أسطورة المنصورة 🎓"
+];
+
+async function typePhrase(el, phrase, speed = 75) {
+  el.textContent = '';
+  for (const ch of phrase) {
+    el.textContent += ch;
+    await sleep(speed);
+  }
+  await sleep(1400);
+  for (let i = phrase.length; i >= 0; i--) {
+    el.textContent = phrase.slice(0, i);
+    await sleep(30);
+  }
+}
+
+async function startTyping() {
+  const el = document.getElementById('intro-msg');
+  while (true) {
+    for (const p of phrases) {
+      await typePhrase(el, p);
+      await sleep(200);
+    }
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ======== INTRO ========
+function enterSite() {
+  const intro = document.getElementById('intro');
+  const main = document.getElementById('main');
+  const loader = document.getElementById('page-loader');
+
+  intro.classList.add('fade-out');
+  loader.style.display = 'flex';
+
+  setTimeout(async () => {
+    intro.style.display = 'none';
+    loader.classList.remove('hidden');
+    await loadMemories();
+    loader.classList.add('hidden');
+    main.classList.add('visible');
+  }, 1000);
+}
+
+// ======== CELEBRATION POPUP ========
+function showCeleb(name) {
+  document.getElementById('celeb-name').textContent = name;
+  const overlay = document.getElementById('celeb-overlay');
+  overlay.classList.add('active');
+
+  // Launch confetti
+  const container = document.getElementById('celeb-confetti');
+  container.innerHTML = '';
+  const colors = ['#d4af37','#c0365a','#f5ede0','#e05070','#f0d060','#7a1e3c'];
+  for (let i = 0; i < 35; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'conf-dot';
+    dot.style.cssText = `
+      left: ${10 + Math.random() * 80}%;
+      top: ${Math.random() * 30}%;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      width: ${3 + Math.random() * 6}px;
+      height: ${3 + Math.random() * 6}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      animation-duration: ${1.5 + Math.random() * 2}s;
+      animation-delay: ${Math.random() * 0.8}s;
+    `;
+    container.appendChild(dot);
+  }
+}
+
+function closeCeleb() {
+  const overlay = document.getElementById('celeb-overlay');
+  overlay.classList.remove('active');
+}
+
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  const icon = type === 'success' ? '✓' : '✕';
+  t.innerHTML = `<span>${icon}</span> ${msg}`;
+  t.className = `show ${type}`;
+  setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ======== MODAL ========
+function openModal() {
+  document.getElementById('modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+// ======== FILE HANDLING ========
+function onFileChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('الصورة أكبر من 5MB', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('preview-img').src = ev.target.result;
+    document.getElementById('preview-wrap').classList.add('show');
+    document.getElementById('upload-zone').style.opacity = '0.5';
+    imgConfirmed = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmImg() {
+  imgConfirmed = true;
+  showToast('تم تأكيد الصورة ✓');
+}
+
+function resetImg() {
+  document.getElementById('inp-file').value = '';
+  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('upload-zone').style.opacity = '1';
+  imgConfirmed = false;
+}
+
+// ======== SUPABASE ========
+async function supabaseQuery(method, table, query = '', body = null) {
+  if (table === 'memories') {
+    if (method === 'GET') return { data: mockMemories, error: null };
+    if (method === 'POST') {
+      const mem = { id: Date.now(), ...body, created_at: new Date().toISOString() };
+      mockMemories.unshift(mem);
+      localStorage.setItem('mockMemories', JSON.stringify(mockMemories));
+      return { data: [mem], error: null };
+    }
+    if (method === 'DELETE') {
+      const id = query.match(/id=eq\.(\d+)/)?.[1];
+      mockMemories = mockMemories.filter(m => String(m.id) !== String(id));
+      localStorage.setItem('mockMemories', JSON.stringify(mockMemories));
+      return { data: [], error: null };
+    }
+  }
+
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const opts = {
+    method,
+    mode: 'cors',
+    credentials: 'omit',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return { data: await res.json(), error: null };
+  } catch (err) {
+    if (method === 'GET') return { data: mockMemories, error: null };
+    return { data: null, error: err };
+  }
+}
+
+function getPublicUrl(bucket, path) {
+  const stored = localStorage.getItem(`file_${path}`);
+  if (stored) return stored;
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+}
+
+// ======== LOAD MEMORIES ========
+async function loadMemories() {
+  const grid = document.getElementById('memories-grid');
+  grid.innerHTML = '';
+
+  const { data } = await supabaseQuery('GET', 'memories', '?order=created_at.desc');
+
+  document.getElementById('count-stat').textContent = data?.length || 0;
+
+  if (!data || data.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🌸</div>
+        <div class="empty-title">لا توجد ذكريات بعد</div>
+        <div class="empty-sub">كن أول من يضيف ذكرى لهذا الجدار ✨</div>
+      </div>`;
+    return;
+  }
+
+  data.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card';
+    card.style.animationDelay = `${i * 0.07}s`;
+    card.innerHTML = `
+      <button class="delete-btn" onclick="askDelete('${item.id}', '${(item.image_url||'').replace(/'/g,"\\'")}')">✕</button>
+      <div class="card-img-wrap">
+        <img class="memory-img" src="${item.image_url || ''}" alt="${item.name || ''}"
+          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22260%22%3E%3Crect fill=%22%23251015%22 width=%22300%22 height=%22260%22/%3E%3Ctext fill=%22%23555%22 font-size=%2240%22 x=%22150%22 y=%22140%22 text-anchor=%22middle%22%3E🖼️%3C/text%3E%3C/svg%3E'">
+      </div>
+      <div class="card-body">
+        <div class="memory-name"><div class="memory-name-dot"></div>${item.name || ''}</div>
+        <div class="memory-msg">${item.message || ''}</div>
+        <div class="card-date">${formatDate(item.created_at)}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// ======== SAVE MEMORY ========
+async function saveMemory() {
+  const name = document.getElementById('inp-name').value.trim();
+  const msg = document.getElementById('inp-msg').value.trim();
+  const file = document.getElementById('inp-file').files[0];
+  const btn = document.getElementById('submit-btn');
+
+  if (!name) { showToast('أدخل اسمك أولاً', 'error'); return; }
+  if (!msg) { showToast('اكتب رسالتك أو ذكراك', 'error'); return; }
+  if (!file) { showToast('اختر صورة للذكرى', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري النشر...';
+
+  try {
+    const ext = file.name.split('.').pop();
+    const path = `public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+    // Try real Supabase upload
+    let imageUrl = '';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${path}`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type },
+        body: file
+      });
+      if (res.ok) {
+        imageUrl = getPublicUrl('photos', path);
+      }
+    } catch (_) {}
+
+    // Fallback: base64 in localStorage
+    if (!imageUrl) {
+      imageUrl = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => {
+          localStorage.setItem(`file_${path}`, e.target.result);
+          res(e.target.result);
         };
+        r.readAsDataURL(file);
+      });
+    }
 
-        function skipIntro() {
-            const introScreen = document.getElementById('intro-screen');
-            introScreen.classList.add('hidden');
-            loadMemories();
-        }
+    const { error } = await supabaseQuery('POST', 'memories', '', { name, message: msg, image_url: imageUrl });
+    if (error) throw error;
 
-        function toggleModal(show) {
-            document.getElementById('add-modal').classList.toggle('active', show);
-        }
+    closeModal();
+    resetForm();
+    await loadMemories();
+    showCeleb(name);
 
-        async function loadMemories() {
-            const container = document.getElementById('memories-container');
-            const loader = document.getElementById('loading-overlay');
-            loader.style.display = 'flex';
+  } catch (err) {
+    showToast('حدث خطأ، حاول مرة أخرى', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'نشر الذكرى 🕊️';
+  }
+}
 
-            try {
-                const { data, error } = await supabaseClient
-                    .from('memories')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+function resetForm() {
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-msg').value = '';
+  document.getElementById('inp-file').value = '';
+  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('upload-zone').style.opacity = '1';
+  imgConfirmed = false;
+}
 
-                if (error) {
-                    console.error("Supabase Error:", error);
-                    throw error;
-                }
+// ======== DELETE ========
+function askDelete(id, url) {
+  pendingDeleteId = id;
+  pendingDeleteUrl = url;
+  document.getElementById('confirm-overlay').classList.add('active');
+}
 
-                container.innerHTML = "";
-                
-                if (!data || data.length === 0) {
-                    container.innerHTML = "<p style='grid-column: 1/-1;'>لا توجد ذكريات منشورة بعد. كن أول من يشارك!</p>";
-                } else {
-                    data.forEach(item => {
-                        const card = `
-                            <div class="memory-card" id="memory-${item.id}">
-                                <button class="delete-btn" onclick="deleteMemory('${item.id}', '${item.image_url.replace(/'/g, "\\'")}')">×</button>
-                                <img src="${item.image_url}" class="memory-img" alt="${item.name}">
-                                <div class="memory-name">${item.name}</div>
-                                <div class="memory-msg">${item.message}</div>
-                            </div>
-                        `;
-                        container.innerHTML += card;
-                    });
-                }
-            } catch (err) {
-                console.error("Error loading memories:", err);
-                container.innerHTML = "<p style='grid-column: 1/-1;'>حدث خطأ أثناء تحميل البيانات.</p>";
-            } finally {
-                loader.style.display = "none";
-            }
-        }
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('active');
+  pendingDeleteId = null;
+  pendingDeleteUrl = null;
+}
 
-        async function saveMemory() {
-            const name = document.getElementById('name-input').value.trim();
-            const msg = document.getElementById('message-input').value.trim();
-            const photoFile = document.getElementById('photo-input').files[0];
-            const btn = document.getElementById('submit-btn');
+document.getElementById('confirm-yes').onclick = async () => {
+  if (!pendingDeleteId) return;
+  closeConfirm();
 
-            if (!name || !msg || !photoFile) {
-                alert("يرجى إكمال جميع البيانات واختيار صورة.");
-                return;
-            }
+  try {
+    const { error } = await supabaseQuery('DELETE', 'memories', `?id=eq.${pendingDeleteId}`);
+    if (error) throw error;
 
-            btn.disabled = true;
-            btn.innerText = "جاري النشر...";
+    // Try delete from storage
+    if (pendingDeleteUrl && !pendingDeleteUrl.startsWith('data:')) {
+      const parts = pendingDeleteUrl.split('/');
+      const fname = parts[parts.length - 1];
+      try {
+        await fetch(`${SUPABASE_URL}/storage/v1/object/photos/public/${fname}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+      } catch (_) {}
+    }
 
-            try {
-                // 1. Upload Image to Supabase Storage
-                const fileExt = photoFile.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                const filePath = `public/${fileName}`;
+    showToast('تم حذف الذكرى');
+    await loadMemories();
+  } catch (err) {
+    showToast('حدث خطأ أثناء الحذف', 'error');
+  }
+};
 
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('photos')
-                    .upload(filePath, photoFile);
+// ======== KEYBOARD ========
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeConfirm();
+    closeCeleb();
+  }
+});
 
-                if (uploadError) {
-                    console.error("Upload Error:", uploadError);
-                    throw uploadError;
-                }
+// ======== INIT ========
+window.onload = () => {
+  createParticles();
+  setTimeout(() => startTyping(), 2600);
 
-                // Get Public URL
-                const { data: urlData } = supabaseClient.storage
-                    .from('photos')
-                    .getPublicUrl(filePath);
-                
-                const downloadURL = urlData.publicUrl;
-
-                // 2. Save to Supabase Database
-                const { data: insertData, error: dbError } = await supabaseClient
-                    .from('memories')
-                    .insert([
-                        { name: name, message: msg, image_url: downloadURL }
-                    ])
-                    .select();
-
-                if (dbError) {
-                    console.error("Database Error:", dbError);
-                    throw dbError;
-                }
-
-                alert("تم نشر ذكراك بنجاح!");
-                toggleModal(false);
-                
-                // Reset form
-                document.getElementById('name-input').value = '';
-                document.getElementById('message-input').value = '';
-                document.getElementById('photo-input').value = '';
-                
-                btn.disabled = false;
-                btn.innerText = "نشر الذكرى";
-                
-                loadMemories();
-            } catch (error) {
-                console.error("Error saving memory:", error);
-                alert("حدث خطأ أثناء النشر: " + error.message);
-                btn.disabled = false;
-                btn.innerText = "نشر الذكرى";
-            }
-        }
-
-        async function deleteMemory(id, imageUrl) {
-            if (!confirm("هل أنت متأكد من حذف هذه الذكرى؟")) {
-                return;
-            }
-
-            try {
-                // 1. Delete from Database FIRST
-                const { error: dbError } = await supabaseClient
-                    .from('memories')
-                    .delete()
-                    .eq('id', id);
-
-                if (dbError) {
-                    console.error("Database Delete Error:", dbError);
-                    throw dbError;
-                }
-
-                console.log("Record deleted from database successfully");
-
-                // 2. Delete from Storage (extract filename from URL)
-                try {
-                    const urlParts = imageUrl.split('/');
-                    const fileName = urlParts[urlParts.length - 1];
-                    const filePath = `public/${fileName}`;
-                    
-                    const { error: storageError } = await supabaseClient.storage
-                        .from('photos')
-                        .remove([filePath]);
-
-                    if (storageError) {
-                        console.warn("Storage delete warning:", storageError);
-                        // Don't throw - storage delete is optional
-                    } else {
-                        console.log("File deleted from storage successfully");
-                    }
-                } catch (storageErr) {
-                    console.warn("Storage deletion skipped:", storageErr);
-                }
-
-                alert("تم حذف الذكرى بنجاح.");
-                loadMemories();
-            } catch (error) {
-                console.error("Error deleting memory:", error);
-                alert("حدث خطأ أثناء الحذف: " + error.message);
-            }
-        }
-    </script>
+  // Auto-enter after 12s
+  setTimeout(() => {
+    if (document.getElementById('intro').style.display !== 'none') {
+      enterSite();
+    }
+  }, 12000);
+};
+</script>
 </body>
 </html>
