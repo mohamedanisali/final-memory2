@@ -477,7 +477,7 @@ body::before {
 .card-img-wrap {
   position: relative;
   overflow: hidden;
-  height: 260px;
+  height: 350px; /* تم توحيد الارتفاع مع إطار التعديل */
 }
 
 .card-img-wrap::after {
@@ -784,7 +784,7 @@ textarea.field-input {
 
 .img-preview-wrap img {
   width: 100%;
-  max-height: 220px;
+  aspect-ratio: 280 / 350; /* الحفاظ على نفس نسبة إطار التعديل */
   object-fit: cover;
   border-radius: 12px;
   display: block;
@@ -1084,7 +1084,7 @@ textarea.field-input {
 
 .editor-frame-inner {
   width: 280px;
-  height: 360px;
+  height: 350px; /* تم ضبط الارتفاع ليتناسب مع إطار العرض */
   overflow: hidden;
   position: relative;
   background: var(--bg2);
@@ -3421,7 +3421,7 @@ function confirmEditorImage() {
   // Export at the frame's display size (280×350) but at 2x for sharpness
   const EXPORT_W = 560;
   const EXPORT_H = 700;
-  const scaleUp = EXPORT_W / (document.getElementById('editor-canvas').width || 280);
+  const scaleUp = EXPORT_W / 280; // استخدام العرض الثابت للإطار الداخلي لضمان الدقة
 
   const offCanvas = document.createElement('canvas');
   offCanvas.width  = EXPORT_W;
@@ -3442,7 +3442,9 @@ function confirmEditorImage() {
   document.getElementById('preview-img').src = editedImageDataUrl;
   document.getElementById('preview-wrap').classList.add('show');
   document.getElementById('upload-zone').style.opacity = '0.5';
-  imgConfirmed = false;
+  
+  // تأكيد الصورة تلقائياً عند الضغط على "حفظ التعديل"
+  imgConfirmed = true; 
 
   closeImageEditor();
   showToast('تم تعديل الصورة بنجاح ✓');
@@ -3586,25 +3588,34 @@ async function saveMemory() {
 
   if (!name) { showToast('أدخل اسمك أولاً', 'error'); return; }
   if (!msg)  { showToast('اكتب رسالتك أو ذكراك', 'error'); return; }
-  if (!file) { showToast('اختر صورة للذكرى', 'error'); return; }
+  // التحقق من وجود صورة (سواء الأصلية أو المعدلة)
+  if (!file && !editedImageDataUrl) { showToast('اختر صورة للذكرى', 'error'); return; }
 
   btn.disabled = true;
   btn.textContent = 'جاري النشر...';
 
   try {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    // تحديد الامتداد والمسار
+    const ext = file ? (file.name.split('.').pop() || 'jpg').toLowerCase() : 'jpg';
     const path = `public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
     // ======= الخطوة 1: رفع الصورة =======
     let imageUrl = '';
 
-    // استخدم الصورة الأصلية كاملة
-    const imageData = (editedImageDataUrl || originalFileDataUrl) || await new Promise(resolve => {
+    // إعطاء الأولوية للصورة المعدلة (التي تظهر في الفريم)
+    const imageData = editedImageDataUrl || originalFileDataUrl || (file ? await new Promise(resolve => {
       const r = new FileReader();
       r.onload = e => resolve(e.target.result);
       r.onerror = () => resolve('');
       r.readAsDataURL(file);
-    });
+    }) : '');
+
+    if (!imageData) {
+      showToast('لم يتم العثور على بيانات الصورة', 'error');
+      btn.disabled = false;
+      btn.textContent = 'نشر الذكرى 🕊️';
+      return;
+    }
 
     // حاول Supabase Storage
     try {
