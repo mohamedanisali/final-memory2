@@ -1958,61 +1958,58 @@ footer {
   .cp-name { font-size: 1.9rem; }
   .cp-message { font-size: 0.95rem; }
 }
-/* ========== CROP EDITOR ========== */
-.crop-editor {
+/* ========== IMAGE EDITOR (Pan & Zoom) ========== */
+.img-editor {
   display: none;
   margin-top: 14px;
   border-radius: 14px;
   overflow: hidden;
   border: 1.5px solid rgba(192,54,90,0.25);
-  background: rgba(0,0,0,0.3);
+  background: #0a0308;
 }
-.crop-editor.show { display: block; }
+.img-editor.show { display: block; }
 
-.crop-instructions {
+.img-editor-hint {
   text-align: center;
-  font-size: 0.75rem;
-  color: rgba(245,237,224,0.45);
+  font-size: 0.73rem;
+  color: rgba(245,237,224,0.4);
+  padding: 7px 12px 5px;
   letter-spacing: 1px;
-  padding: 8px 12px 6px;
 }
 
-.crop-viewport {
+.img-editor-view {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 280px;
   overflow: hidden;
   cursor: grab;
-  background: #0a0308;
   touch-action: none;
+  background: #0a0308;
 }
-.crop-viewport:active { cursor: grabbing; }
+.img-editor-view:active { cursor: grabbing; }
 
-#crop-canvas {
+.img-editor-view img {
   position: absolute;
-  top: 0; left: 0;
+  transform-origin: 0 0;
+  user-select: none;
+  -webkit-user-drag: none;
   pointer-events: none;
+  max-width: none;
 }
 
-.crop-controls {
-  padding: 10px 16px 6px;
-}
-
-.crop-slider-row {
+.img-editor-zoom {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 8px 14px 6px;
 }
-
-.crop-slider-icon { font-size: 1rem; flex-shrink: 0; }
-.crop-slider-val {
+.img-editor-zoom span { font-size: 0.9rem; flex-shrink: 0; }
+.zoom-val {
   font-size: 0.75rem;
   color: var(--gold);
   min-width: 38px;
-  text-align: left;
 }
-
-.crop-slider {
+.zoom-slider {
   flex: 1;
   -webkit-appearance: none;
   height: 3px;
@@ -2021,21 +2018,21 @@ footer {
   outline: none;
   cursor: pointer;
 }
-.crop-slider::-webkit-slider-thumb {
+.zoom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px; height: 18px;
+  width: 20px; height: 20px;
   border-radius: 50%;
   background: var(--gold);
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+  box-shadow: 0 0 8px rgba(212,175,55,0.4);
 }
 
-.crop-actions {
+.img-editor-actions {
   display: flex;
   gap: 10px;
-  padding: 8px 12px 12px;
+  padding: 6px 12px 12px;
 }
-.crop-actions .btn-sm { flex: 1; }
+.img-editor-actions .btn-sm { flex: 1; }
 
 </style>
 </head>
@@ -2141,39 +2138,22 @@ footer {
           سجّل ذكراك 🕊️
         </button>
       </div>
-      <button class="reveal-btn" id="reveal-kashf-btn" onclick="handleRevealClick()">
-        🗝️ كشف الجدار
-      </button>
-      <button class="reveal-btn" id="admin-slideshow-btn" onclick="openAdminPanel()" style="display:none; margin-top:14px; background:transparent; border:1.5px solid rgba(212,175,55,0.5); color:var(--gold); box-shadow:none;">
-        🖥️ عرض الجدار على الشاشة
-      </button>
-      <button class="reveal-btn" id="admin-reveal-kashf-btn" onclick="openRevealOverlay()" style="display:none; margin-top:10px;">
-        🗝️ كشف الجدار (بكلمة السر)
-      </button>
-      <button id="admin-lock-btn" onclick="lockAdminButtons()" style="display:none; margin-top:14px; background:none; border:none; color:rgba(245,237,224,0.35); font-family:Tajawal,sans-serif; font-size:0.8rem; cursor:pointer; letter-spacing:1px; transition:color 0.3s;" onmouseover="this.style.color='rgba(245,237,224,0.7)'" onmouseout="this.style.color='rgba(245,237,224,0.35)'">
-        ↩ رجوع للوضع العادي
-      </button>
-      <div id="admin-grid-bar" class="grid-size-bar" style="display:none; margin-top:18px; justify-content:center;">
-        <span class="grid-size-label">حجم الشبكة:</span>
-        <button class="grid-size-btn" onclick="setSsGrid(4)" data-g="4">4 صور</button>
-        <button class="grid-size-btn active" onclick="setSsGrid(9)" data-g="9">9 صور</button>
-        <button class="grid-size-btn" onclick="setSsGrid(16)" data-g="16">16 صور</button>
-        <button class="grid-size-btn" onclick="setSsGrid(25)" data-g="25">25 صور</button>
-        <div style="display:flex; align-items:center; gap:6px; margin-right:6px;">
-          <input id="custom-grid-input" type="number" min="1" max="100" placeholder="مخصص"
-            style="width:72px; padding:6px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(212,175,55,0.3); border-radius:20px; color:var(--gold); font-family:Tajawal,sans-serif; font-size:0.8rem; text-align:center; outline:none;"
-            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-          <button class="grid-size-btn" onclick="applyCustomGrid()" style="padding:6px 14px;">✓</button>
+      <!-- Admin bar — مخفي، يظهر بس لو URL فيه #admin-M3A -->
+      <div id="admin-bar" style="display:none; flex-direction:column; align-items:center; gap:10px; margin-top:16px;">
+        <button class="reveal-btn" onclick="startSlideshow()" style="background:transparent; border:1.5px solid rgba(212,175,55,0.5); color:var(--gold); box-shadow:none;">
+          🖥️ عرض الجدار على الشاشة
+        </button>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:4px;">
+          <span class="grid-size-label">حجم الشبكة:</span>
+          <button class="grid-size-btn" onclick="setSsGrid(4)" data-g="4">4 صور</button>
+          <button class="grid-size-btn active" onclick="setSsGrid(9)" data-g="9">9 صور</button>
+          <button class="grid-size-btn" onclick="setSsGrid(16)" data-g="16">16 صور</button>
+          <button class="grid-size-btn" onclick="setSsGrid(25)" data-g="25">25 صور</button>
         </div>
       </div>
     </div>
 
-    <div id="back-to-locked-wrap" style="display:none; text-align:center; margin-bottom:20px;">
-      <button onclick="backToLocked()" style="background:none; border:1px solid rgba(255,255,255,0.1); color:rgba(245,237,224,0.45); font-family:Tajawal,sans-serif; font-size:0.85rem; padding:8px 22px; border-radius:30px; cursor:pointer; letter-spacing:2px; transition:all 0.3s;" onmouseover="this.style.color='rgba(245,237,224,0.8)';this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.color='rgba(245,237,224,0.45)';this.style.borderColor='rgba(255,255,255,0.1)'">
-        ↩ رجوع
-      </button>
-    </div>
-    <div id="memories-grid" class="grid-hidden"></div>
+    <div id="memories-grid"></div>
   </div>
 
   <footer>
@@ -2210,22 +2190,11 @@ footer {
         <div class="upload-sub">JPG, PNG, WEBP — حتى 5MB</div>
       </div>
 
-      <!-- Crop Editor -->
-      <div class="crop-editor" id="crop-editor">
-        <div class="crop-instructions">اسحب الصورة • قرّب وبعّد • ابعد الجزء اللي عايزه</div>
-        <div class="crop-viewport" id="crop-viewport">
-          <canvas id="crop-canvas"></canvas>
-        </div>
-        <div class="crop-controls">
-          <div class="crop-slider-row">
-            <span class="crop-slider-icon">🔍</span>
-            <input type="range" id="crop-zoom" min="50" max="300" value="100" class="crop-slider">
-            <span class="crop-slider-val" id="crop-zoom-val">100%</span>
-          </div>
-        </div>
-        <div class="crop-actions">
-          <button class="btn-sm btn-confirm" onclick="applyCrop()">✓ تأكيد القص</button>
-          <button class="btn-sm btn-reupload" onclick="resetImg()">↩ تغيير الصورة</button>
+      <div class="img-preview-wrap" id="preview-wrap">
+        <img id="preview-img" src="" alt="معاينة">
+        <div class="img-preview-actions">
+          <button class="btn-sm btn-confirm" onclick="confirmImg()">✓ تأكيد الصورة</button>
+          <button class="btn-sm btn-reupload" onclick="resetImg()">↩ تغيير</button>
         </div>
       </div>
     </div>
@@ -2348,94 +2317,18 @@ let pendingDeleteId = null;
 let pendingDeleteUrl = null;
 let imgConfirmed = false;
 
-// ======== REVEAL PASSWORD ========
-const REVEAL_PASSWORD = 'M3A';
-let gridRevealed = false;
+// ======== ADMIN MODE — بالـ URL hash ========
+const ADMIN_HASH = 'admin-M3A';
+let isAdmin = false;
 
-// ======== SECRET ADMIN UNLOCK (5 clicks on كشف الجدار) ========
-let revealClickCount = 0;
-let revealClickTimer = null;
-
-function handleRevealClick() {
-  revealClickCount++;
-  clearTimeout(revealClickTimer);
-
-  if (revealClickCount < 5) {
-    // Show toast message for clicks 1-4
-    showToast('الذكريات مخفية لحين يوم الحفلة 🎓 بس دلوقتي تقدر تسجّل ذكراك ✨ 🌟');
-    revealClickTimer = setTimeout(() => { revealClickCount = 0; }, 3000);
-  } else {
-    // 5th click — reveal the two secret buttons
-    revealClickCount = 0;
-    unlockAdminButtons();
-    showToast('أهلاً بالمسؤول 🔓', 'success');
+function checkAdminMode() {
+  if (window.location.hash === '#' + ADMIN_HASH) {
+    isAdmin = true;
+    document.getElementById('admin-bar').style.display = 'flex';
+    // أظهر أزرار الحذف على الكارد
+    document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'flex');
   }
 }
-
-function unlockAdminButtons() {
-  document.getElementById('admin-slideshow-btn').style.display = 'block';
-  document.getElementById('admin-grid-bar').style.display = 'flex';
-  document.getElementById('admin-reveal-kashf-btn').style.display = 'block';
-  document.getElementById('admin-lock-btn').style.display = 'inline-block';
-  document.getElementById('reveal-kashf-btn').style.display = 'none';
-}
-
-function lockAdminButtons() {
-  document.getElementById('admin-slideshow-btn').style.display = 'none';
-  document.getElementById('admin-grid-bar').style.display = 'none';
-  document.getElementById('admin-reveal-kashf-btn').style.display = 'none';
-  document.getElementById('admin-lock-btn').style.display = 'none';
-  document.getElementById('reveal-kashf-btn').style.display = 'block';
-  revealClickCount = 0;
-}
-
-function openRevealOverlay() {
-  document.getElementById('reveal-overlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('reveal-pass-input').focus(), 300);
-}
-
-function closeRevealOverlay() {
-  document.getElementById('reveal-overlay').classList.remove('active');
-  document.getElementById('reveal-pass-input').value = '';
-  document.getElementById('reveal-pass-input').classList.remove('error');
-  document.body.style.overflow = '';
-}
-
-function handleRevealOverlayClick(e) {
-  if (e.target === document.getElementById('reveal-overlay')) closeRevealOverlay();
-}
-
-function checkRevealPass() {
-  const input = document.getElementById('reveal-pass-input');
-  if (input.value.trim() === REVEAL_PASSWORD) {
-    closeRevealOverlay();
-    revealGrid();
-  } else {
-    input.classList.add('error');
-    input.value = '';
-    setTimeout(() => input.classList.remove('error'), 600);
-    showToast('كلمة السر غلط', 'error');
-  }
-}
-
-function revealGrid() {
-  gridRevealed = true;
-  document.getElementById('memories-grid').classList.remove('grid-hidden');
-  document.getElementById('locked-banner').style.display = 'none';
-  document.getElementById('back-to-locked-wrap').style.display = 'block';
-  showToast('تم كشف الجدار ✨', 'success');
-}
-
-function backToLocked() {
-  gridRevealed = false;
-  document.getElementById('memories-grid').classList.add('grid-hidden');
-  document.getElementById('locked-banner').style.display = '';
-  document.getElementById('back-to-locked-wrap').style.display = 'none';
-}
-
-// ======== ADMIN CONFIG ========
-const ADMIN_PASSWORD = 'M3A';
 
 // ======== FINAL MESSAGES ========
 const finalMessages = [
@@ -2632,6 +2525,7 @@ function enterSite() {
     await loadMemories();
     loader.classList.add('hidden');
     main.classList.add('visible');
+    checkAdminMode();
   }, 1000);
 }
 
@@ -2691,15 +2585,8 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-// ======== CROP EDITOR ========
-let cropImg = null;
-let cropX = 0, cropY = 0;
-let cropZoom = 1;
-let cropDragging = false;
-let cropDragStart = { x: 0, y: 0 };
-let cropLastTouch = null;
-let cropPinchDist = null;
-let croppedDataUrl = null;
+// ======== FILE HANDLING ========
+let originalFileDataUrl = null;
 
 function onFileChange(e) {
   const file = e.target.files[0];
@@ -2710,147 +2597,25 @@ function onFileChange(e) {
   }
   const reader = new FileReader();
   reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      cropImg = img;
-      cropZoom = 1;
-      // توسيط الصورة
-      const vp = document.getElementById('crop-viewport');
-      cropX = (vp.offsetWidth  - img.width)  / 2;
-      cropY = (vp.offsetHeight - img.height) / 2;
-      document.getElementById('crop-zoom').value = 100;
-      document.getElementById('crop-zoom-val').textContent = '100%';
-      document.getElementById('upload-zone').style.opacity = '0.4';
-      document.getElementById('crop-editor').classList.add('show');
-      croppedDataUrl = null;
-      imgConfirmed = false;
-      drawCrop();
-      initCropEvents();
-    };
-    img.src = ev.target.result;
+    originalFileDataUrl = ev.target.result;
+    document.getElementById('preview-img').src = ev.target.result;
+    document.getElementById('preview-wrap').classList.add('show');
+    document.getElementById('upload-zone').style.opacity = '0.5';
+    imgConfirmed = false;
   };
   reader.readAsDataURL(file);
 }
 
-function drawCrop() {
-  if (!cropImg) return;
-  const vp   = document.getElementById('crop-viewport');
-  const canvas = document.getElementById('crop-canvas');
-  const W = vp.offsetWidth, H = vp.offsetHeight;
-  canvas.width  = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-  const dw = cropImg.width  * cropZoom;
-  const dh = cropImg.height * cropZoom;
-  ctx.drawImage(cropImg, cropX, cropY, dw, dh);
-
-  // إطار التوجيه
-  ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([5, 5]);
-  ctx.strokeRect(W * 0.05, H * 0.05, W * 0.9, H * 0.9);
-  ctx.setLineDash([]);
-}
-
-function initCropEvents() {
-  const vp = document.getElementById('crop-viewport');
-  // تجنب إضافة listeners أكثر من مرة
-  vp.onmousedown = e => {
-    cropDragging = true;
-    cropDragStart = { x: e.clientX - cropX, y: e.clientY - cropY };
-  };
-  window.onmousemove = e => {
-    if (!cropDragging) return;
-    cropX = e.clientX - cropDragStart.x;
-    cropY = e.clientY - cropDragStart.y;
-    drawCrop();
-  };
-  window.onmouseup = () => { cropDragging = false; };
-
-  // Touch: سحب
-  vp.ontouchstart = e => {
-    if (e.touches.length === 1) {
-      cropDragging = true;
-      cropDragStart = {
-        x: e.touches[0].clientX - cropX,
-        y: e.touches[0].clientY - cropY
-      };
-      cropPinchDist = null;
-    } else if (e.touches.length === 2) {
-      cropDragging = false;
-      cropPinchDist = getTouchDist(e.touches);
-    }
-  };
-  vp.ontouchmove = e => {
-    e.preventDefault();
-    if (e.touches.length === 1 && cropDragging) {
-      cropX = e.touches[0].clientX - cropDragStart.x;
-      cropY = e.touches[0].clientY - cropDragStart.y;
-      drawCrop();
-    } else if (e.touches.length === 2 && cropPinchDist) {
-      const newDist = getTouchDist(e.touches);
-      const ratio = newDist / cropPinchDist;
-      cropZoom = Math.min(3, Math.max(0.5, cropZoom * ratio));
-      cropPinchDist = newDist;
-      document.getElementById('crop-zoom').value = Math.round(cropZoom * 100);
-      document.getElementById('crop-zoom-val').textContent = Math.round(cropZoom * 100) + '%';
-      drawCrop();
-    }
-  };
-  vp.ontouchend = () => { cropDragging = false; cropPinchDist = null; };
-
-  // Zoom slider
-  document.getElementById('crop-zoom').oninput = function() {
-    cropZoom = this.value / 100;
-    document.getElementById('crop-zoom-val').textContent = this.value + '%';
-    drawCrop();
-  };
-}
-
-function getTouchDist(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function applyCrop() {
-  if (!cropImg) return;
-  const vp = document.getElementById('crop-viewport');
-  const W = vp.offsetWidth, H = vp.offsetHeight;
-
-  // اعمل canvas بنسبة 1:1 جودة عالية
-  const out = document.createElement('canvas');
-  out.width  = W * 2;
-  out.height = H * 2;
-  const ctx = out.getContext('2d');
-  ctx.scale(2, 2);
-  const dw = cropImg.width  * cropZoom;
-  const dh = cropImg.height * cropZoom;
-  ctx.drawImage(cropImg, cropX, cropY, dw, dh);
-
-  croppedDataUrl = out.toDataURL('image/jpeg', 0.92);
+function confirmImg() {
   imgConfirmed = true;
   showToast('تم تأكيد الصورة ✓');
-
-  // أظهر preview صغيرة تحت الـ crop
-  document.getElementById('crop-editor').style.opacity = '0.7';
-  document.getElementById('crop-editor').style.pointerEvents = 'none';
-  showToast('الصورة جاهزة للنشر ✓');
-}
-
-function confirmImg() {
-  applyCrop();
 }
 
 function resetImg() {
   document.getElementById('inp-file').value = '';
-  document.getElementById('crop-editor').classList.remove('show');
-  document.getElementById('crop-editor').style.opacity = '';
-  document.getElementById('crop-editor').style.pointerEvents = '';
+  document.getElementById('preview-wrap').classList.remove('show');
   document.getElementById('upload-zone').style.opacity = '1';
-  cropImg = null;
-  croppedDataUrl = null;
+  originalFileDataUrl = null;
   imgConfirmed = false;
 }
 
@@ -2948,7 +2713,7 @@ async function loadMemories() {
     const safeMsg  = (item.message||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
     card.innerHTML = `
-      <button class="delete-btn" onclick="askDeleteCard(this)">✕</button>
+      <button class="delete-btn" onclick="askDeleteCard(this)" style="display:${isAdmin ? 'flex' : 'none'}">✕</button>
       <button class="share-btn"  onclick="shareCardEl(this)">↗</button>
       <div class="card-img-wrap">
         <img class="memory-img" src="${safeUrl}" alt="${safeName}"
@@ -2990,18 +2755,15 @@ async function saveMemory() {
     // ======= الخطوة 1: رفع الصورة =======
     let imageUrl = '';
 
-    // لو فيه صورة مقصوصة استخدمها، غير كده حوّل الملف
-    let imageData = croppedDataUrl;
-    if (!imageData) {
-      imageData = await new Promise(resolve => {
-        const r = new FileReader();
-        r.onload = e => resolve(e.target.result);
-        r.onerror = () => resolve('');
-        r.readAsDataURL(file);
-      });
-    }
+    // استخدم الصورة الأصلية كاملة
+    const imageData = originalFileDataUrl || await new Promise(resolve => {
+      const r = new FileReader();
+      r.onload = e => resolve(e.target.result);
+      r.onerror = () => resolve('');
+      r.readAsDataURL(file);
+    });
 
-    // حاول Supabase Storage — ارفع كـ blob من base64
+    // حاول Supabase Storage
     try {
       const blob = await fetch(imageData).then(r => r.blob());
       const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${path}`, {
@@ -3019,10 +2781,8 @@ async function saveMemory() {
       }
     } catch (_) {}
 
-    // Fallback: استخدم الـ base64 مباشرة
-    if (!imageUrl) {
-      imageUrl = imageData;
-    }
+    // Fallback
+    if (!imageUrl) imageUrl = imageData;
 
     // ======= الخطوة 2: حفظ الذكرى =======
     const memData = { name, message: msg, image_url: imageUrl };
@@ -3070,12 +2830,9 @@ function resetForm() {
   document.getElementById('inp-name').value = '';
   document.getElementById('inp-msg').value = '';
   document.getElementById('inp-file').value = '';
-  document.getElementById('crop-editor').classList.remove('show');
-  document.getElementById('crop-editor').style.opacity = '';
-  document.getElementById('crop-editor').style.pointerEvents = '';
+  document.getElementById('preview-wrap').classList.remove('show');
   document.getElementById('upload-zone').style.opacity = '1';
-  cropImg = null;
-  croppedDataUrl = null;
+  originalFileDataUrl = null;
   imgConfirmed = false;
 }
 
