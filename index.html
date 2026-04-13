@@ -3033,7 +3033,7 @@ const SUPABASE_URL = 'https://qryfzlsrjbgbalyxdjhd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyeWZ6bHNyamJnYmFseXhkamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzI4MTMsImV4cCI6MjA5MTUwODgxM30.Ezfy8YQU6Mg6Xx70pDPFNOI2spcSGJU9GOb3q6IMr_s';
 
 // ======== STATE ========
-let mockMemories = JSON.parse(localStorage.getItem('mockMemories') || '[]');
+let mockMemories = [];
 let pendingDeleteId = null;
 let pendingDeleteUrl = null;
 let imgConfirmed = false;
@@ -3625,17 +3625,14 @@ async function supabaseQuery(method, table, query = '', body = null) {
     return { data, error: null };
   } catch (err) {
     console.error('Supabase error:', err);
-    // Fallback to local mock for GET only
     if (method === 'GET') {
-      return { data: mockMemories, error: null };
+      return { data: [], error: err };
     }
     return { data: null, error: err };
   }
 }
 
 function getPublicUrl(bucket, path) {
-  const stored = localStorage.getItem(`file_${path}`);
-  if (stored) return stored;
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
 
@@ -3644,7 +3641,7 @@ async function loadMemories() {
   const grid = document.getElementById('memories-grid');
   grid.innerHTML = '';
 
-  // حاول تجيب من Supabase
+  // جيب من Supabase فقط
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/memories?order=created_at.desc`, {
       headers: {
@@ -3654,15 +3651,13 @@ async function loadMemories() {
     });
     if (res.ok) {
       const cloudData = await res.json();
-      if (Array.isArray(cloudData) && cloudData.length > 0) {
-        // دمج: الذكريات المحلية غير المرفوعة + الكلاود
-        const cloudIds = new Set(cloudData.map(m => String(m.id)));
-        const localOnly = mockMemories.filter(m => m._local && !cloudIds.has(String(m.id)));
-        mockMemories = [...localOnly, ...cloudData];
-        try { localStorage.setItem('mockMemories', JSON.stringify(mockMemories)); } catch(_) {}
-      }
+      mockMemories = Array.isArray(cloudData) ? cloudData : [];
+    } else {
+      mockMemories = [];
     }
-  } catch (_) { /* استخدم الكاش المحلي */ }
+  } catch (_) {
+    mockMemories = [];
+  }
 
   const memories = mockMemories;
   document.getElementById('count-stat').textContent = memories?.length || 0;
@@ -3789,16 +3784,6 @@ async function saveMemory() {
       savedToCloud = res.ok;
     } catch (_) { /* Supabase غير متاح */ }
 
-    // دايماً احفظ محلياً — fallback مضمون
-    const mem = {
-      id: Date.now(),
-      ...memData,
-      created_at: new Date().toISOString(),
-      _local: !savedToCloud   // علامة إنه محلي فقط
-    };
-    mockMemories.unshift(mem);
-    try { localStorage.setItem('mockMemories', JSON.stringify(mockMemories)); } catch(_) {}
-
     closeModal();
     resetForm();
     await loadMemories();
@@ -3860,7 +3845,6 @@ document.getElementById('confirm-yes').onclick = async () => {
 
   // احذف من الكاش المحلي دايماً
   mockMemories = mockMemories.filter(m => String(m.id) !== String(delId));
-  try { localStorage.setItem('mockMemories', JSON.stringify(mockMemories)); } catch(_) {}
 
   // حاول تحذف من Supabase
   try {
