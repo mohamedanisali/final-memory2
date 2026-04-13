@@ -2716,13 +2716,20 @@ footer {
         <button class="reveal-btn" onclick="startSlideshow()" style="background:transparent; border:1.5px solid rgba(212,175,55,0.5); color:var(--gold); box-shadow:none;">
           🖥️ عرض الجدار على الشاشة
         </button>
-        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:4px;">
-          <span class="grid-size-label">حجم الشبكة:</span>
-          <button class="grid-size-btn" onclick="setSsGrid(4)" data-g="4">4 صور</button>
-          <button class="grid-size-btn active" onclick="setSsGrid(9)" data-g="9">9 صور</button>
-          <button class="grid-size-btn" onclick="setSsGrid(16)" data-g="16">16 صور</button>
-          <button class="grid-size-btn" onclick="setSsGrid(25)" data-g="25">25 صور</button>
-        </div>
+
+      </div>
+    </div>
+
+    <!-- Grid View Options -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; margin-bottom:24px; padding:14px 20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
+      <span style="font-size:0.8rem; color:rgba(245,237,224,0.5); letter-spacing:2px; margin-left:8px;">عرض الصور في الشاشة:</span>
+      <button class="grid-size-btn active" onclick="setSsGrid(1)" data-g="1">1 صورة</button>
+      <button class="grid-size-btn" onclick="setSsGrid(4)" data-g="4">4 صور</button>
+      <button class="grid-size-btn" onclick="setSsGrid(16)" data-g="16">16 صور</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input id="custom-grid-input" type="number" min="1" max="200" placeholder="عدد مخصص"
+          style="width:110px;padding:7px 10px;border-radius:8px;border:1px solid rgba(212,175,55,0.3);background:rgba(255,255,255,0.05);color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;text-align:center;outline:none;">
+        <button class="grid-size-btn" onclick="applyCustomGrid()">تطبيق</button>
       </div>
     </div>
 
@@ -2982,17 +2989,21 @@ function getCongratsMessage(name) {
 }
 
 // ======== GRID SIZE ========
-let SS_PER_PAGE = 9;
+let SS_PER_PAGE = 1;
 
 function setSsGrid(n) {
   SS_PER_PAGE = n;
   document.querySelectorAll('.grid-size-btn[data-g]').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.g) === n);
   });
-  const cols = Math.round(Math.sqrt(n));
-  const minSize = cols >= 4 ? '180px' : cols === 3 ? '240px' : '300px';
-  document.getElementById('memories-grid').style.gridTemplateColumns =
-    `repeat(${cols}, minmax(${minSize}, 1fr))`;
+  rebuildSlideshow();
+}
+
+function rebuildSlideshow() {
+  if (document.getElementById('slideshow').classList.contains('active')) {
+    buildSsPages(mockMemories);
+    ssShow(0);
+  }
 }
 
 function applyCustomGrid() {
@@ -3010,6 +3021,7 @@ function applyCustomGrid() {
   const minSize = cols >= 4 ? '180px' : cols === 3 ? '240px' : '300px';
   document.getElementById('memories-grid').style.gridTemplateColumns =
     `repeat(${cols}, minmax(${minSize}, 1fr))`;
+  rebuildSlideshow();
   input.style.borderColor = 'rgba(80,200,120,0.6)';
   setTimeout(() => input.style.borderColor = 'rgba(212,175,55,0.3)', 1000);
 }
@@ -3571,7 +3583,6 @@ async function loadMemories() {
 
     card.innerHTML = `
       <button class="delete-btn" onclick="askDeleteCard(this)" style="display:${isAdmin ? 'flex' : 'none'}">✕</button>
-      <button class="share-btn"  onclick="shareCardEl(this)">↗</button>
       <div class="card-img-wrap">
         <img class="memory-img" src="${safeUrl}" alt="${safeName}"
           onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22260%22%3E%3Crect fill=%22%23251015%22 width=%22300%22 height=%22260%22/%3E%3Ctext fill=%22%23555%22 font-size=%2240%22 x=%22150%22 y=%22140%22 text-anchor=%22middle%22%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E'">
@@ -3814,7 +3825,12 @@ let ssTimer = null;
 let ssPages = [];
 
 function getSsColumns() {
-  return Math.round(Math.sqrt(SS_PER_PAGE));
+  if (SS_PER_PAGE === 1) return 1;
+  if (SS_PER_PAGE <= 4) return 2;
+  if (SS_PER_PAGE <= 9) return 3;
+  if (SS_PER_PAGE <= 16) return 4;
+  if (SS_PER_PAGE <= 25) return 5;
+  return Math.ceil(Math.sqrt(SS_PER_PAGE));
 }
 
 function buildSsPages(data) {
@@ -3855,8 +3871,9 @@ function renderSsPages() {
     const page = document.createElement('div');
     page.className = 'ss-page';
     page.id = `ss-page-${pi}`;
+    const rows = Math.ceil(SS_PER_PAGE / cols);
     page.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    page.style.gridTemplateRows = `repeat(${cols}, 1fr)`;
+    page.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
     // Fill cells
     for (let ci = 0; ci < SS_PER_PAGE; ci++) {
