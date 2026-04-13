@@ -943,6 +943,286 @@ textarea.field-input {
 }
 .btn-cancel:hover { background: rgba(255,255,255,0.09); }
 
+/* ========== IMAGE EDITOR MODAL ========== */
+#image-editor-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+#image-editor-modal.active {
+  display: flex;
+}
+
+.editor-container {
+  background: var(--bg2);
+  border-radius: 20px;
+  border: 1px solid rgba(212,175,55,0.2);
+  box-shadow: 0 0 60px rgba(212,175,55,0.1);
+  max-width: 900px;
+  width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.editor-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(212,175,55,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-header h2 {
+  color: var(--gold);
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.editor-close {
+  background: none;
+  border: none;
+  color: var(--cream-d);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.editor-close:hover { color: var(--gold); }
+
+.editor-body {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 16px;
+  padding: 16px 20px;
+  flex: 1;
+  overflow: auto;
+  direction: rtl;
+}
+
+@media (max-width: 768px) {
+  .editor-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scale-sliders-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: rgba(212,175,55,0.05);
+  border: 1px solid rgba(212,175,55,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.scale-slider-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.scale-slider-item .control-label {
+  margin-bottom: 0;
+}
+.fit-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: rgba(212,175,55,0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Tajawal', sans-serif;
+  white-space: nowrap;
+  transition: all 0.25s;
+}
+.fit-btn:hover {
+  background: var(--gold);
+  color: #1a0608;
+}
+
+.editor-canvas-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #2d1020 0%, #1a0608 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.1);
+  overflow: hidden;
+  position: relative;
+  min-height: 400px;
+}
+
+.editor-frame {
+  position: relative;
+  background: var(--bg);
+  border: 20px solid;
+  border-image: linear-gradient(135deg, #d4af37, #c0365a, #d4af37) 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(212,175,55,0.2), inset 0 0 30px rgba(212,175,55,0.05);
+}
+
+.editor-frame-inner {
+  width: 280px;
+  height: 360px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg2);
+}
+
+#editor-canvas {
+  position: absolute;
+  cursor: grab;
+  display: block;
+}
+#editor-canvas.dragging {
+  cursor: grabbing;
+}
+
+.editor-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.control-group {
+  background: rgba(212,175,55,0.05);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(212,175,55,0.1);
+}
+
+.control-label {
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.control-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.editor-btn {
+  padding: 10px 12px;
+  background: rgba(122,30,60,0.3);
+  border: 1px solid var(--burg);
+  color: var(--cream);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+.editor-btn:hover {
+  background: var(--burg);
+  box-shadow: 0 0 15px rgba(192,54,90,0.3);
+}
+.editor-btn:active {
+  transform: scale(0.96);
+}
+
+.editor-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(212,175,55,0.2), rgba(212,175,55,0.5));
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.editor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+.editor-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+
+.slider-value {
+  color: var(--cream-d);
+  font-size: 0.7rem;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.editor-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(212,175,55,0.15);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.editor-footer-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.editor-footer-btn.cancel {
+  background: rgba(192,54,90,0.2);
+  color: var(--burg-l);
+  border: 1px solid var(--burg);
+}
+.editor-footer-btn.cancel:hover {
+  background: rgba(192,54,90,0.4);
+}
+
+.editor-footer-btn.confirm {
+  background: linear-gradient(135deg, #d4af37, #c0365a);
+  color: white;
+  box-shadow: 0 0 20px rgba(212,175,55,0.3);
+}
+.editor-footer-btn.confirm:hover {
+  box-shadow: 0 0 30px rgba(212,175,55,0.5);
+  transform: translateY(-2px);
+}
+
 /* ========== FOOTER ========== */
 footer {
   text-align: center;
@@ -2034,6 +2314,287 @@ footer {
 }
 .img-editor-actions .btn-sm { flex: 1; }
 
+/* ========== IMAGE EDITOR MODAL ========== */
+#image-editor-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+#image-editor-modal.active {
+  display: flex;
+}
+
+.editor-container {
+  background: var(--bg2);
+  border-radius: 20px;
+  border: 1px solid rgba(212,175,55,0.2);
+  box-shadow: 0 0 60px rgba(212,175,55,0.1);
+  max-width: 900px;
+  width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.editor-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(212,175,55,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor-header h2 {
+  color: var(--gold);
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.editor-close {
+  background: none;
+  border: none;
+  color: var(--cream-d);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.editor-close:hover { color: var(--gold); }
+
+.editor-body {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 16px;
+  padding: 16px 20px;
+  flex: 1;
+  overflow: auto;
+  direction: rtl;
+}
+
+@media (max-width: 768px) {
+  .editor-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scale-sliders-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: rgba(212,175,55,0.05);
+  border: 1px solid rgba(212,175,55,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.scale-slider-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.scale-slider-item .control-label {
+  margin-bottom: 0;
+}
+.fit-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: rgba(212,175,55,0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Tajawal', sans-serif;
+  white-space: nowrap;
+  transition: all 0.25s;
+}
+.fit-btn:hover {
+  background: var(--gold);
+  color: #1a0608;
+}
+
+.editor-canvas-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #2d1020 0%, #1a0608 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.1);
+  overflow: hidden;
+  position: relative;
+  min-height: 400px;
+}
+
+.editor-frame {
+  position: relative;
+  background: var(--bg);
+  border: 20px solid;
+  border-image: linear-gradient(135deg, #d4af37, #c0365a, #d4af37) 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(212,175,55,0.2), inset 0 0 30px rgba(212,175,55,0.05);
+}
+
+.editor-frame-inner {
+  width: 280px;
+  height: 350px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg2);
+}
+
+#editor-canvas {
+  position: absolute;
+  cursor: grab;
+  display: block;
+}
+#editor-canvas.dragging {
+  cursor: grabbing;
+}
+
+.editor-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.control-group {
+  background: rgba(212,175,55,0.05);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(212,175,55,0.1);
+}
+
+.control-label {
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.control-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.editor-btn {
+  padding: 10px 12px;
+  background: rgba(122,30,60,0.3);
+  border: 1px solid var(--burg);
+  color: var(--cream);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  font-family: 'Tajawal', sans-serif;
+}
+.editor-btn:hover {
+  background: var(--burg);
+  box-shadow: 0 0 15px rgba(192,54,90,0.3);
+}
+.editor-btn:active {
+  transform: scale(0.96);
+}
+
+.editor-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(212,175,55,0.2), rgba(212,175,55,0.5));
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.editor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+.editor-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+
+.slider-value {
+  color: var(--cream-d);
+  font-size: 0.7rem;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.editor-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(212,175,55,0.15);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.editor-footer-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.editor-footer-btn.cancel {
+  background: rgba(192,54,90,0.2);
+  color: var(--burg-l);
+  border: 1px solid var(--burg);
+}
+.editor-footer-btn.cancel:hover {
+  background: rgba(192,54,90,0.4);
+}
+
+.editor-footer-btn.confirm {
+  background: linear-gradient(135deg, #d4af37, #c0365a);
+  color: white;
+  box-shadow: 0 0 20px rgba(212,175,55,0.3);
+}
+.editor-footer-btn.confirm:hover {
+  box-shadow: 0 0 30px rgba(212,175,55,0.5);
+  transform: translateY(-2px);
+}
+
 </style>
 </head>
 <body>
@@ -2200,6 +2761,51 @@ footer {
     </div>
 
     <button class="submit-btn" id="submit-btn" onclick="saveMemory()">نشر الذكرى 🕊️</button>
+  </div>
+</div>
+
+<!-- ======== IMAGE EDITOR MODAL ======== -->
+<div id="image-editor-modal" class="image-editor-modal">
+  <div class="editor-container" style="max-width:560px;">
+    <div class="editor-header">
+      <h2>ظبّط صورتك 🎨</h2>
+      <button class="editor-close" onclick="closeImageEditor()">✕</button>
+    </div>
+    
+    <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px;">
+      <!-- Canvas frame -->
+      <div class="editor-canvas-wrapper">
+        <div class="editor-frame">
+          <div class="editor-frame-inner" id="editor-frame-inner">
+            <canvas id="editor-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hint -->
+      <div style="text-align:center; color:rgba(245,237,224,0.45); font-size:0.78rem; letter-spacing:1px;">
+        اسحب الصورة بإصبعك أو الماوس لتحريكها داخل الإطار
+      </div>
+
+      <!-- Zoom slider -->
+      <div style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.15); border-radius:10px; padding:14px 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <label class="control-label" style="margin:0;">🔍 التكبير / التصغير</label>
+          <span style="color:var(--gold); font-size:0.85rem; font-weight:700;"><span id="zoom-value">100</span>%</span>
+        </div>
+        <input type="range" class="editor-slider" id="zoom-slider" min="20" max="400" value="100" style="width:100%;">
+        <div style="display:flex; justify-content:space-between; margin-top:6px; color:rgba(245,237,224,0.3); font-size:0.7rem;">
+          <span>20%</span>
+          <button type="button" class="fit-btn" onclick="event.preventDefault(); event.stopPropagation(); fitToFrame();" style="padding:4px 12px; font-size:0.75rem; position: relative; z-index: 10;">⊡ ملاءمة للإطار</button>
+          <span>400%</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="editor-footer">
+      <button class="editor-footer-btn cancel" onclick="closeImageEditor()">إلغاء</button>
+      <button class="editor-footer-btn confirm" onclick="confirmEditorImage()">تأكيد ✓</button>
+    </div>
   </div>
 </div>
 
@@ -2598,12 +3204,248 @@ function onFileChange(e) {
   const reader = new FileReader();
   reader.onload = ev => {
     originalFileDataUrl = ev.target.result;
-    document.getElementById('preview-img').src = ev.target.result;
-    document.getElementById('preview-wrap').classList.add('show');
-    document.getElementById('upload-zone').style.opacity = '0.5';
-    imgConfirmed = false;
+    // افتح محرر الصور
+    openImageEditor(ev.target.result);
   };
   reader.readAsDataURL(file);
+}
+
+// ======== IMAGE EDITOR ========
+let editorImg = null; // keep loaded image in memory for fast redraws
+
+function openImageEditor(imageSrc) {
+  editorState = { zoom: 100, offsetX: 0, offsetY: 0, isDragging: false, dragStartX: 0, dragStartY: 0, lastTouchDist: null };
+
+  // reset zoom slider
+  const zSlider = document.getElementById('zoom-slider');
+  if (zSlider) { zSlider.value = 100; }
+  const zVal = document.getElementById('zoom-value');
+  if (zVal) zVal.textContent = 100;
+
+  const modal = document.getElementById('image-editor-modal');
+  modal.classList.add('active');
+
+  editorImg = new Image();
+  editorImg.onload = () => {
+    // Wait one frame so the canvas is visible and has real dimensions
+    requestAnimationFrame(() => {
+      fitToFrame();          // auto-fit on open
+      setupEditorListeners();
+    });
+  };
+  editorImg.src = imageSrc;
+}
+
+function closeImageEditor() {
+  document.getElementById('image-editor-modal').classList.remove('active');
+  removeEditorListeners();
+}
+
+function getCanvasDimensions() {
+  const canvas = document.getElementById('editor-canvas');
+  const frameInner = document.getElementById('editor-frame-inner');
+  const rect = frameInner.getBoundingClientRect();
+  const cw = rect.width  || 280;
+  const ch = rect.height || 350;
+  canvas.width  = cw;
+  canvas.height = ch;
+  return { canvas, cw, ch };
+}
+
+function drawEditorCanvas() {
+  if (!editorImg) return;
+  const { canvas, cw, ch } = getCanvasDimensions();
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, cw, ch);
+
+  const scale = editorState.zoom / 100;
+  const dw = editorImg.naturalWidth  * scale;
+  const dh = editorImg.naturalHeight * scale;
+
+  // center + offset
+  const x = (cw - dw) / 2 + editorState.offsetX;
+  const y = (ch - dh) / 2 + editorState.offsetY;
+
+  ctx.drawImage(editorImg, x, y, dw, dh);
+}
+
+window.fitToFrame = function() {
+  if (!editorImg) return;
+  const { cw, ch } = getCanvasDimensions();
+  // scale to fill (cover), not just fit
+  const fitScale = Math.max(cw / editorImg.naturalWidth, ch / editorImg.naturalHeight);
+  const pct = Math.round(fitScale * 100);
+  
+  editorState.zoom    = pct;
+  editorState.offsetX = 0;
+  editorState.offsetY = 0;
+  
+  const zSlider = document.getElementById('zoom-slider');
+  if (zSlider) { 
+    zSlider.min = Math.min(20, Math.round(pct * 0.5)); 
+    zSlider.max = Math.max(400, Math.round(pct * 2)); 
+    zSlider.value = pct; 
+  }
+  
+  const zVal = document.getElementById('zoom-value');
+  if (zVal) zVal.textContent = pct;
+  
+  drawEditorCanvas();
+  console.log('Fit to frame executed:', pct);
+};
+
+function setupEditorListeners() {
+  const canvas = document.getElementById('editor-canvas');
+  const zoomSlider = document.getElementById('zoom-slider');
+
+  if (zoomSlider) {
+    zoomSlider._handleZoom = () => {
+      editorState.zoom = parseInt(zoomSlider.value);
+      document.getElementById('zoom-value').textContent = editorState.zoom;
+      drawEditorCanvas();
+    };
+    zoomSlider.addEventListener('input', zoomSlider._handleZoom);
+  }
+
+  // Mouse drag
+  canvas._onMouseDown = e => {
+    editorState.isDragging = true;
+    editorState.dragStartX = e.clientX;
+    editorState.dragStartY = e.clientY;
+    canvas.classList.add('dragging');
+  };
+  canvas._onMouseMove = e => {
+    if (!editorState.isDragging) return;
+    editorState.offsetX += e.clientX - editorState.dragStartX;
+    editorState.offsetY += e.clientY - editorState.dragStartY;
+    editorState.dragStartX = e.clientX;
+    editorState.dragStartY = e.clientY;
+    drawEditorCanvas();
+  };
+  canvas._onMouseUp = () => { editorState.isDragging = false; canvas.classList.remove('dragging'); };
+
+  canvas.addEventListener('mousedown', canvas._onMouseDown);
+  canvas.addEventListener('mousemove', canvas._onMouseMove);
+  canvas.addEventListener('mouseup',   canvas._onMouseUp);
+  canvas.addEventListener('mouseleave',canvas._onMouseUp);
+
+  // Touch drag + pinch zoom
+  canvas._onTouchStart = e => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      editorState.isDragging  = true;
+      editorState.dragStartX  = e.touches[0].clientX;
+      editorState.dragStartY  = e.touches[0].clientY;
+      editorState.lastTouchDist = null;
+    } else if (e.touches.length === 2) {
+      editorState.isDragging = false;
+      editorState.lastTouchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    }
+  };
+  canvas._onTouchMove = e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && editorState.isDragging) {
+      editorState.offsetX += e.touches[0].clientX - editorState.dragStartX;
+      editorState.offsetY += e.touches[0].clientY - editorState.dragStartY;
+      editorState.dragStartX = e.touches[0].clientX;
+      editorState.dragStartY = e.touches[0].clientY;
+      drawEditorCanvas();
+    } else if (e.touches.length === 2 && editorState.lastTouchDist !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = dist / editorState.lastTouchDist;
+      editorState.zoom = Math.min(400, Math.max(20, Math.round(editorState.zoom * ratio)));
+      editorState.lastTouchDist = dist;
+      const zSlider = document.getElementById('zoom-slider');
+      if (zSlider) zSlider.value = editorState.zoom;
+      const zVal = document.getElementById('zoom-value');
+      if (zVal) zVal.textContent = editorState.zoom;
+      drawEditorCanvas();
+    }
+  };
+  canvas._onTouchEnd = e => {
+    if (e.touches.length < 2) editorState.lastTouchDist = null;
+    if (e.touches.length === 0) editorState.isDragging = false;
+  };
+  canvas.addEventListener('touchstart', canvas._onTouchStart, { passive: false });
+  canvas.addEventListener('touchmove',  canvas._onTouchMove,  { passive: false });
+  canvas.addEventListener('touchend',   canvas._onTouchEnd);
+
+  // Wheel zoom (desktop)
+  canvas._onWheel = e => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 10 : -10;
+    const zSlider = document.getElementById('zoom-slider');
+    const minZ = zSlider ? parseInt(zSlider.min) : 20;
+    const maxZ = zSlider ? parseInt(zSlider.max) : 400;
+    
+    editorState.zoom = Math.min(maxZ, Math.max(minZ, editorState.zoom + delta));
+    if (zSlider) zSlider.value = editorState.zoom;
+    const zVal = document.getElementById('zoom-value');
+    if (zVal) zVal.textContent = editorState.zoom;
+    drawEditorCanvas();
+  };
+  canvas.addEventListener('wheel', canvas._onWheel, { passive: false });
+}
+
+function removeEditorListeners() {
+  const canvas = document.getElementById('editor-canvas');
+  if (!canvas) return;
+  if (canvas._onMouseDown) {
+    canvas.removeEventListener('mousedown',  canvas._onMouseDown);
+    canvas.removeEventListener('mousemove',  canvas._onMouseMove);
+    canvas.removeEventListener('mouseup',    canvas._onMouseUp);
+    canvas.removeEventListener('mouseleave', canvas._onMouseUp);
+  }
+  if (canvas._onTouchStart) {
+    canvas.removeEventListener('touchstart', canvas._onTouchStart);
+    canvas.removeEventListener('touchmove',  canvas._onTouchMove);
+    canvas.removeEventListener('touchend',   canvas._onTouchEnd);
+  }
+  if (canvas._onWheel) canvas.removeEventListener('wheel', canvas._onWheel);
+  const zSlider = document.getElementById('zoom-slider');
+  if (zSlider && zSlider._handleZoom) zSlider.removeEventListener('input', zSlider._handleZoom);
+}
+
+function rotateImage(angle) { /* kept for compatibility, not used */ }
+function moveImage(dx, dy)   { /* kept for compatibility, not used */ }
+
+function confirmEditorImage() {
+  if (!editorImg) return;
+
+  // Export at the frame's display size (280×350) but at 2x for sharpness
+  const EXPORT_W = 560;
+  const EXPORT_H = 700;
+  const scaleUp = EXPORT_W / (document.getElementById('editor-canvas').width || 280);
+
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width  = EXPORT_W;
+  offCanvas.height = EXPORT_H;
+  const ctx = offCanvas.getContext('2d');
+
+  const scale  = editorState.zoom / 100;
+  const dw = editorImg.naturalWidth  * scale * scaleUp;
+  const dh = editorImg.naturalHeight * scale * scaleUp;
+  const x  = (EXPORT_W - dw) / 2 + editorState.offsetX * scaleUp;
+  const y  = (EXPORT_H - dh) / 2 + editorState.offsetY * scaleUp;
+
+  ctx.drawImage(editorImg, x, y, dw, dh);
+
+  editedImageDataUrl = offCanvas.toDataURL('image/jpeg', 0.92);
+
+  // أظهر البريفيو
+  document.getElementById('preview-img').src = editedImageDataUrl;
+  document.getElementById('preview-wrap').classList.add('show');
+  document.getElementById('upload-zone').style.opacity = '0.5';
+  imgConfirmed = false;
+
+  closeImageEditor();
+  showToast('تم تعديل الصورة بنجاح ✓');
 }
 
 function confirmImg() {
@@ -2616,6 +3458,7 @@ function resetImg() {
   document.getElementById('preview-wrap').classList.remove('show');
   document.getElementById('upload-zone').style.opacity = '1';
   originalFileDataUrl = null;
+  editedImageDataUrl = null;
   imgConfirmed = false;
 }
 
@@ -2756,7 +3599,7 @@ async function saveMemory() {
     let imageUrl = '';
 
     // استخدم الصورة الأصلية كاملة
-    const imageData = originalFileDataUrl || await new Promise(resolve => {
+    const imageData = (editedImageDataUrl || originalFileDataUrl) || await new Promise(resolve => {
       const r = new FileReader();
       r.onload = e => resolve(e.target.result);
       r.onerror = () => resolve('');
@@ -2833,6 +3676,7 @@ function resetForm() {
   document.getElementById('preview-wrap').classList.remove('show');
   document.getElementById('upload-zone').style.opacity = '1';
   originalFileDataUrl = null;
+  editedImageDataUrl = null;
   imgConfirmed = false;
 }
 
