@@ -664,6 +664,46 @@ body::before {
   transform: scale(1.1) rotate(90deg) !important;
 }
 
+/* ========== COPY LINK BTN ========== */
+.copy-link-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px; height: 32px;
+  background: rgba(212,175,55,0.85);
+  backdrop-filter: blur(10px);
+  color: #1a0608;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: var(--t-fast);
+  z-index: 10;
+  title: "نسخ رابط الذكرى";
+}
+
+.memory-card:hover .copy-link-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.copy-link-btn:hover {
+  background: var(--gold);
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+}
+
+.copy-link-btn.copied {
+  background: #2ecc71;
+  color: white;
+}
+
 /* ========== EMPTY STATE ========== */
 .empty-state {
   grid-column: 1 / -1;
@@ -3327,6 +3367,7 @@ function enterSite() {
     loader.classList.add('hidden');
     main.classList.add('visible');
     checkAdminMode();
+    checkMemoryParam();
   }, 1000);
 }
 
@@ -3749,6 +3790,7 @@ async function loadMemories() {
 
     card.innerHTML = `
       <button class="delete-btn" onclick="askDeleteCard(this)" style="display:${isAdmin ? 'flex' : 'none'}">✕</button>
+      <button class="copy-link-btn" onclick="event.stopPropagation();copyMemoryLink(this)" title="نسخ رابط الذكرى">🔗</button>
       <div class="card-img-wrap" onclick="event.stopPropagation();lbOpen(${i})">
         <img class="memory-img" src="${safeUrl}" alt="${safeName}"
           onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22260%22%3E%3Crect fill=%22%23251015%22 width=%22300%22 height=%22260%22/%3E%3Ctext fill=%22%23555%22 font-size=%2240%22 x=%22150%22 y=%22140%22 text-anchor=%22middle%22%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E'">
@@ -4122,6 +4164,52 @@ function ssTogglePlay() {
     clearTimeout(ssTimer);
     const prog = document.getElementById('ss-progress');
     prog.style.transition = 'none';
+  }
+}
+
+// ======== COPY MEMORY LINK ========
+function copyMemoryLink(btn) {
+  const card = btn.closest('.memory-card');
+  const id = card.dataset.id;
+  const baseUrl = window.location.href.split('?')[0].split('#')[0];
+  const link = `${baseUrl}?memory=${id}`;
+
+  navigator.clipboard.writeText(link).then(() => {
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    showToast('تم نسخ رابط الذكرى 🔗');
+    setTimeout(() => {
+      btn.textContent = '🔗';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = link;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    showToast('تم نسخ رابط الذكرى 🔗');
+    setTimeout(() => {
+      btn.textContent = '🔗';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ======== OPEN MEMORY BY URL PARAM ========
+function checkMemoryParam() {
+  const params = new URLSearchParams(window.location.search);
+  const memId = params.get('memory');
+  if (!memId || !mockMemories.length) return;
+  const idx = mockMemories.findIndex(m => String(m.id) === String(memId));
+  if (idx !== -1) {
+    setTimeout(() => lbOpen(idx), 600);
   }
 }
 
