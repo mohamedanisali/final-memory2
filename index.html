@@ -950,9 +950,11 @@ textarea.field-input {
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
   z-index: 8000;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   backdrop-filter: blur(3px);
+  overflow-y: auto;
+  padding: 20px 0;
 }
 #image-editor-modal.active {
   display: flex;
@@ -965,7 +967,7 @@ textarea.field-input {
   box-shadow: 0 0 60px rgba(212,175,55,0.1);
   max-width: 900px;
   width: 90%;
-  max-height: 85vh;
+  max-height: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -983,6 +985,7 @@ textarea.field-input {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .editor-header h2 {
@@ -1007,8 +1010,10 @@ textarea.field-input {
   gap: 16px;
   padding: 16px 20px;
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   direction: rtl;
+  min-height: 0;
 }
 
 @media (max-width: 768px) {
@@ -1191,6 +1196,7 @@ textarea.field-input {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .editor-footer-btn {
@@ -2321,9 +2327,11 @@ footer {
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
   z-index: 8000;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   backdrop-filter: blur(3px);
+  overflow-y: auto;
+  padding: 20px 0;
 }
 #image-editor-modal.active {
   display: flex;
@@ -2336,7 +2344,7 @@ footer {
   box-shadow: 0 0 60px rgba(212,175,55,0.1);
   max-width: 900px;
   width: 90%;
-  max-height: 85vh;
+  max-height: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2354,6 +2362,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .editor-header h2 {
@@ -2378,8 +2387,10 @@ footer {
   gap: 16px;
   padding: 16px 20px;
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   direction: rtl;
+  min-height: 0;
 }
 
 @media (max-width: 768px) {
@@ -2563,6 +2574,7 @@ footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .editor-footer-btn {
