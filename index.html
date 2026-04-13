@@ -49,6 +49,102 @@ body::before {
   z-index: 9998;
 }
 
+
+/* ========== LIGHTBOX ========== */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(16px);
+  z-index: 7500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+#lightbox.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.lb-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transform: scale(0.92);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+#lightbox.active .lb-content {
+  transform: scale(1);
+}
+.lb-img {
+  max-width: 90vw;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.15);
+  display: block;
+}
+.lb-info {
+  text-align: center;
+}
+.lb-name {
+  font-family: 'Amiri', serif;
+  font-size: 1.5rem;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+.lb-msg {
+  font-size: 0.9rem;
+  color: var(--cream-d);
+  line-height: 1.7;
+  max-width: 500px;
+}
+.lb-close {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 42px; height: 42px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 7600;
+}
+.lb-close:hover { background: rgba(220,50,50,0.5); }
+.lb-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 7600;
+}
+.lb-nav:hover { background: rgba(255,255,255,0.2); }
+#lb-prev { right: 16px; }
+#lb-next { left: 16px; }
+
 /* ========== INTRO ========== */
 #intro {
   position: fixed;
@@ -2996,10 +3092,24 @@ function setSsGrid(n) {
   document.querySelectorAll('.grid-size-btn[data-g]').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.g) === n);
   });
+  // Update main page grid columns
+  const cols = getSsColumns();
+  const minSize = cols >= 4 ? '180px' : cols === 2 ? '280px' : cols === 1 ? '400px' : '240px';
+  document.getElementById('memories-grid').style.gridTemplateColumns =
+    cols === 1 ? 'minmax(280px, 500px)' : `repeat(${cols}, minmax(${minSize}, 1fr))`;
+  if (cols === 1) {
+    document.getElementById('memories-grid').style.justifyContent = 'center';
+  } else {
+    document.getElementById('memories-grid').style.justifyContent = '';
+  }
   rebuildSlideshow();
 }
 
 function rebuildSlideshow() {
+  if (document.getElementById('lightbox').classList.contains('active')) {
+    if (e.key === 'ArrowLeft') lbNav(1);
+    if (e.key === 'ArrowRight') lbNav(-1);
+  }
   if (document.getElementById('slideshow').classList.contains('active')) {
     buildSsPages(mockMemories);
     ssShow(0);
@@ -3583,7 +3693,7 @@ async function loadMemories() {
 
     card.innerHTML = `
       <button class="delete-btn" onclick="askDeleteCard(this)" style="display:${isAdmin ? 'flex' : 'none'}">✕</button>
-      <div class="card-img-wrap">
+      <div class="card-img-wrap" onclick="event.stopPropagation();lbOpen(${i})">
         <img class="memory-img" src="${safeUrl}" alt="${safeName}"
           onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22260%22%3E%3Crect fill=%22%23251015%22 width=%22300%22 height=%22260%22/%3E%3Ctext fill=%22%23555%22 font-size=%2240%22 x=%22150%22 y=%22140%22 text-anchor=%22middle%22%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E'">
       </div>
@@ -4129,6 +4239,41 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
   ctx.fillText(line.trim(), x, y);
 }
 
+
+// ======== LIGHTBOX ========
+let lbIndex = 0;
+
+function lbOpen(idx) {
+  lbIndex = idx;
+  lbRender();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function lbRender() {
+  const item = mockMemories[lbIndex];
+  if (!item) return;
+  document.getElementById('lb-img').src = item.image_url || '';
+  document.getElementById('lb-name').textContent = item.name || '';
+  document.getElementById('lb-msg').textContent = item.message || '';
+}
+
+function lbNav(dir) {
+  lbIndex = (lbIndex + dir + mockMemories.length) % mockMemories.length;
+  const img = document.getElementById('lb-img');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    lbRender();
+    img.style.transition = 'opacity 0.25s';
+    img.style.opacity = '1';
+  }, 150);
+}
+
+function lbClose() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 // ======== KEYBOARD ========
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
@@ -4139,6 +4284,11 @@ document.addEventListener('keydown', e => {
     closeAdminPanel();
     closeCongratsPopup();
     closeRevealOverlay();
+    lbClose();
+  }
+  if (document.getElementById('lightbox').classList.contains('active')) {
+    if (e.key === 'ArrowLeft') lbNav(1);
+    if (e.key === 'ArrowRight') lbNav(-1);
   }
   if (document.getElementById('slideshow').classList.contains('active')) {
     if (e.key === 'ArrowLeft') ssNext();
@@ -4160,5 +4310,19 @@ window.onload = () => {
   }, 12000);
 };
 </script>
+
+<!-- ======== LIGHTBOX ======== -->
+<div id="lightbox" onclick="lbClose()">
+  <button class="lb-close" onclick="lbClose()">✕</button>
+  <button class="lb-nav" id="lb-prev" onclick="event.stopPropagation();lbNav(-1)">›</button>
+  <button class="lb-nav" id="lb-next" onclick="event.stopPropagation();lbNav(1)">‹</button>
+  <div class="lb-content" onclick="event.stopPropagation()">
+    <img class="lb-img" id="lb-img" src="" alt="">
+    <div class="lb-info">
+      <div class="lb-name" id="lb-name"></div>
+      <div class="lb-msg" id="lb-msg"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
