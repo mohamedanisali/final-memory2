@@ -2860,7 +2860,7 @@ footer {
     <!-- Locked Banner — كونت داون الفوتو داي -->
     <div class="locked-banner" id="locked-banner">
       <p style="font-size:0.78rem; color:rgba(245,237,224,0.45); letter-spacing:2px; margin-bottom:10px; font-weight:300;">دفعة 29 &nbsp;—&nbsp; كلية التمريض &nbsp;—&nbsp; 2026</p>
-      <div class="locked-badge">📸 &nbsp; فوتو داي &nbsp; ✦</div>
+      <div class="locked-badge" id="photo-day-badge" onclick="photoDayBadgeClick()" style="cursor:pointer; user-select:none;">📸 &nbsp; فوتو داي &nbsp; ✦</div>
       <div class="locked-title">استعدوا لـ <span>يوم الذكريات</span></div>
       <div class="locked-divider"></div>
       <div class="locked-timer">
@@ -2930,7 +2930,7 @@ footer {
       </div>
     </div>
 
-    <div id="memories-grid"></div>
+    <div id="memories-grid" class="grid-hidden"></div>
   </div>
 
   <footer>
@@ -3975,7 +3975,61 @@ document.getElementById('confirm-yes').onclick = async () => {
   await loadMemories();
 };
 
-// ======== COUNTDOWN ========
+// ======== REVEAL PASSWORD ========
+const REVEAL_PASSWORD = 'M3A';
+let memoriesRevealed = false;
+
+// ======== PHOTO DAY BADGE CLICK COUNTER ========
+let photoDayClickCount = 0;
+let photoDayClickTimer = null;
+
+function photoDayBadgeClick() {
+  photoDayClickCount++;
+  clearTimeout(photoDayClickTimer);
+  photoDayClickTimer = setTimeout(() => { photoDayClickCount = 0; }, 3000);
+  if (photoDayClickCount >= 5) {
+    photoDayClickCount = 0;
+    openRevealOverlay();
+  }
+}
+
+function openRevealOverlay() {
+  const ov = document.getElementById('reveal-overlay');
+  ov.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const inp = document.getElementById('reveal-pass-input');
+    if (inp) inp.focus();
+  }, 350);
+}
+
+function closeRevealOverlay() {
+  document.getElementById('reveal-overlay').classList.remove('active');
+  document.getElementById('reveal-pass-input').value = '';
+  document.getElementById('reveal-pass-input').classList.remove('error');
+  document.body.style.overflow = '';
+}
+
+function handleRevealOverlayClick(e) {
+  if (e.target === document.getElementById('reveal-overlay')) closeRevealOverlay();
+}
+
+function checkRevealPass() {
+  const inp = document.getElementById('reveal-pass-input');
+  if (inp.value.trim() === REVEAL_PASSWORD) {
+    memoriesRevealed = true;
+    document.getElementById('memories-grid').classList.remove('grid-hidden');
+    closeRevealOverlay();
+    showToast('تم كشف الجدار 🎉');
+  } else {
+    inp.classList.add('error');
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('error'), 600);
+    showToast('كلمة السر غلط', 'error');
+  }
+}
+
+
 // ======== COUNTDOWN (فوتو داي) ========
 (function initCountdown() {
   const target = new Date('2026-04-16T11:00:00+02:00');
